@@ -1,0 +1,609 @@
+{
+  "owned_urls": [
+    {
+      "url_id": "u001",
+      "url": "https://www3.nissan.co.jp/vehicles/new/ariya-details/cruising-distance_charge.html",
+      "brand_topic_category": "EV range, charging and battery confidence",
+      "page_type": "EV range/charging page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u002",
+      "url": "https://www3.nissan.co.jp/vehicles/new/leaf/range_and_charging.html",
+      "brand_topic_category": "EV range, charging and battery confidence",
+      "page_type": "EV range/charging page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u003",
+      "url": "https://www3.nissan.co.jp/vehicles/new/sakura/range_and_charging.html",
+      "brand_topic_category": "EV range, charging and battery confidence",
+      "page_type": "EV range/charging page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u004",
+      "url": "https://www3.nissan.co.jp/vehicles/new/clipper_ev/charge_cruising-distance.html",
+      "brand_topic_category": "EV range, charging and battery confidence",
+      "page_type": "EV range/charging page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u005",
+      "url": "https://www3.nissan.co.jp/vehicles/new/clipper_ev/charge_cruising-distance/cruising-distance_battery.html",
+      "brand_topic_category": "EV range, charging and battery confidence",
+      "page_type": "battery/charging page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u006",
+      "url": "https://www3.nissan.co.jp/vehicles/new/clipper_ev/charge_cruising-distance/charging_method.html",
+      "brand_topic_category": "EV range, charging and battery confidence",
+      "page_type": "EV range/charging page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u007",
+      "url": "https://www3.nissan.co.jp/vehicles/new/leaf/v2h.html",
+      "brand_topic_category": "EV range, charging and battery confidence",
+      "page_type": "EV energy/V2H page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u008",
+      "url": "https://www3.nissan.co.jp/vehicles/new/ariya.html",
+      "brand_topic_category": "EV range, charging and battery confidence",
+      "page_type": "EV model page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u009",
+      "url": "https://www3.nissan.co.jp/vehicles/new/leaf.html",
+      "brand_topic_category": "EV range, charging and battery confidence",
+      "page_type": "EV model page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u010",
+      "url": "https://www3.nissan.co.jp/vehicles/new/sakura.html",
+      "brand_topic_category": "EV range, charging and battery confidence",
+      "page_type": "EV model page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u011",
+      "url": "https://www3.nissan.co.jp/vehicles/new/clipper_ev.html",
+      "brand_topic_category": "EV range, charging and battery confidence",
+      "page_type": "EV commercial model page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u012",
+      "url": "https://www3.nissan.co.jp/optional-parts/vehicles/ariya/etc/charge_item.html",
+      "brand_topic_category": "EV range, charging and battery confidence",
+      "page_type": "EV charging accessory page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u013",
+      "url": "https://www.nissan.co.jp/EV/CHARGE_SUPPORT/ZESP3/renewable_energy.html",
+      "brand_topic_category": "EV range, charging and battery confidence",
+      "page_type": "EV charging/support page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u014",
+      "url": "https://www.nissan.co.jp/EV/MAINTENANCE",
+      "brand_topic_category": "EV range, charging and battery confidence",
+      "page_type": "EV maintenance/warranty page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u015",
+      "url": "https://www.nissan.co.jp/SERVICE/MAINTEPRO/EV",
+      "brand_topic_category": "EV range, charging and battery confidence",
+      "page_type": "EV service plan page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u016",
+      "url": "https://www2.nissan.co.jp/CONNECT/SERVICE/CONVENIENT/evsupport.html",
+      "brand_topic_category": "EV range, charging and battery confidence",
+      "page_type": "EV ownership support page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u017",
+      "url": "https://www3.nissan.co.jp/vehicles/new/note/performance_safety/e-power.html",
+      "brand_topic_category": "Hybrid / e-POWER running costs and powertrain choice",
+      "page_type": "powertrain/e-POWER page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u018",
+      "url": "https://www3.nissan.co.jp/vehicles/new/note/performance_safety/e-power_4wd.html",
+      "brand_topic_category": "Hybrid / e-POWER running costs and powertrain choice",
+      "page_type": "powertrain/e-POWER 4WD page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u019",
+      "url": "https://www3.nissan.co.jp/vehicles/new/aura/performance_safety/e-power.html",
+      "brand_topic_category": "Hybrid / e-POWER running costs and powertrain choice",
+      "page_type": "powertrain/e-POWER page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u020",
+      "url": "https://www3.nissan.co.jp/vehicles/new/aura/performance_safety/e-power_4wd.html",
+      "brand_topic_category": "Hybrid / e-POWER running costs and powertrain choice",
+      "page_type": "powertrain/e-POWER 4WD page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u021",
+      "url": "https://www3.nissan.co.jp/vehicles/new/kicks/performance_safety/e-power.html",
+      "brand_topic_category": "Hybrid / e-POWER running costs and powertrain choice",
+      "page_type": "powertrain/e-POWER page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u022",
+      "url": "https://www3.nissan.co.jp/vehicles/new/x-trail/performance_safety/e-power.html",
+      "brand_topic_category": "Hybrid / e-POWER running costs and powertrain choice",
+      "page_type": "powertrain/e-POWER page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u023",
+      "url": "https://www3.nissan.co.jp/vehicles/new/x-trail/performance_safety/e-4orce.html",
+      "brand_topic_category": "Hybrid / e-POWER running costs and powertrain choice",
+      "page_type": "powertrain/e-4ORCE page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u024",
+      "url": "https://www3.nissan.co.jp/vehicles/new/serena/performance_safety/e-4orce.html",
+      "brand_topic_category": "Hybrid / e-POWER running costs and powertrain choice",
+      "page_type": "powertrain/e-4ORCE page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u025",
+      "url": "https://www3.nissan.co.jp/vehicles/new/note.html",
+      "brand_topic_category": "Hybrid / e-POWER running costs and powertrain choice",
+      "page_type": "hybrid/e-POWER model page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u026",
+      "url": "https://www3.nissan.co.jp/vehicles/new/aura.html",
+      "brand_topic_category": "Hybrid / e-POWER running costs and powertrain choice",
+      "page_type": "hybrid/e-POWER model page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u027",
+      "url": "https://www3.nissan.co.jp/vehicles/new/kicks.html",
+      "brand_topic_category": "Hybrid / e-POWER running costs and powertrain choice",
+      "page_type": "hybrid/e-POWER compact SUV page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u028",
+      "url": "https://www3.nissan.co.jp/vehicles/new/x-trail.html",
+      "brand_topic_category": "Hybrid / e-POWER running costs and powertrain choice",
+      "page_type": "hybrid/e-POWER SUV model page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u029",
+      "url": "https://www3.nissan.co.jp/vehicles/new/serena.html",
+      "brand_topic_category": "Family practicality, space and comfort",
+      "page_type": "family minivan model page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u030",
+      "url": "https://www3.nissan.co.jp/vehicles/new/serena/interior/seat.html",
+      "brand_topic_category": "Family practicality, space and comfort",
+      "page_type": "interior/seating page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u031",
+      "url": "https://www3.nissan.co.jp/vehicles/new/serena/interior/seat_arrangement.html",
+      "brand_topic_category": "Family practicality, space and comfort",
+      "page_type": "seat arrangement page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u032",
+      "url": "https://www3.nissan.co.jp/vehicles/new/serena/interior/comfort.html",
+      "brand_topic_category": "Family practicality, space and comfort",
+      "page_type": "comfort page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u033",
+      "url": "https://www3.nissan.co.jp/vehicles/new/serena/equipment/luggage_storage.html",
+      "brand_topic_category": "Family practicality, space and comfort",
+      "page_type": "luggage/storage page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u034",
+      "url": "https://www3.nissan.co.jp/vehicles/new/x-trail/interior/luggage_storage.html",
+      "brand_topic_category": "Family practicality, space and comfort",
+      "page_type": "luggage/storage page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u035",
+      "url": "https://www3.nissan.co.jp/vehicles/new/x-trail/interior.html",
+      "brand_topic_category": "Family practicality, space and comfort",
+      "page_type": "interior/comfort page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u036",
+      "url": "https://www3.nissan.co.jp/vehicles/new/elgrand.html",
+      "brand_topic_category": "Family practicality, space and comfort",
+      "page_type": "family minivan model page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u037",
+      "url": "https://www3.nissan.co.jp/vehicles/new/elgrand/interior/interior_space.html",
+      "brand_topic_category": "Family practicality, space and comfort",
+      "page_type": "interior space page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u038",
+      "url": "https://www3.nissan.co.jp/vehicles/new/elgrand/interior/amenity.html",
+      "brand_topic_category": "Family practicality, space and comfort",
+      "page_type": "comfort/amenity page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u039",
+      "url": "https://www3.nissan.co.jp/vehicles/new/caravan/loadability_comfort/loadability.html",
+      "brand_topic_category": "Family practicality, space and comfort",
+      "page_type": "loadability page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u040",
+      "url": "https://www3.nissan.co.jp/vehicles/new/caravan/loadability_comfort/comfort.html",
+      "brand_topic_category": "Family practicality, space and comfort",
+      "page_type": "comfort page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u041",
+      "url": "https://www3.nissan.co.jp/vehicles/new/caravan/interior/seat_arrangement.html",
+      "brand_topic_category": "Family practicality, space and comfort",
+      "page_type": "seat arrangement page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u042",
+      "url": "https://www3.nissan.co.jp/vehicles/new/nv200vanette/interior/loadability.html",
+      "brand_topic_category": "Family practicality, space and comfort",
+      "page_type": "loadability page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u043",
+      "url": "https://www3.nissan.co.jp/vehicles/new/nv200vanette/interior/comfort.html",
+      "brand_topic_category": "Family practicality, space and comfort",
+      "page_type": "comfort page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u044",
+      "url": "https://www3.nissan.co.jp/vehicles/new/roox/interior/storage_luggage.html",
+      "brand_topic_category": "Family practicality, space and comfort",
+      "page_type": "storage/luggage page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u045",
+      "url": "https://www3.nissan.co.jp/vehicles/new/dayz/interior/utility.html",
+      "brand_topic_category": "Family practicality, space and comfort",
+      "page_type": "interior utility page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u046",
+      "url": "https://www3.nissan.co.jp/vehicles/new/ariya-details/performance_safety/360_safety_assist.html",
+      "brand_topic_category": "Safety, reliability and trust",
+      "page_type": "360 safety assist page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u047",
+      "url": "https://www3.nissan.co.jp/vehicles/new/leaf/performance_safety/360_safety_assist.html",
+      "brand_topic_category": "Safety, reliability and trust",
+      "page_type": "360 safety assist page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u048",
+      "url": "https://www3.nissan.co.jp/vehicles/new/note/performance_safety/360_safety_assist.html",
+      "brand_topic_category": "Safety, reliability and trust",
+      "page_type": "360 safety assist page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u049",
+      "url": "https://www3.nissan.co.jp/vehicles/new/serena/performance_safety/360_safety_assist.html",
+      "brand_topic_category": "Safety, reliability and trust",
+      "page_type": "360 safety assist page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u050",
+      "url": "https://www3.nissan.co.jp/vehicles/new/sakura/safety/360_safety_assist.html",
+      "brand_topic_category": "Safety, reliability and trust",
+      "page_type": "360 safety assist page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u051",
+      "url": "https://www3.nissan.co.jp/vehicles/new/sakura/safety/propilot.html",
+      "brand_topic_category": "Safety, reliability and trust",
+      "page_type": "ADAS/ProPILOT page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u052",
+      "url": "https://www3.nissan.co.jp/vehicles/new/roox/performance_safety/360_safety_assist.html",
+      "brand_topic_category": "Safety, reliability and trust",
+      "page_type": "360 safety assist page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u053",
+      "url": "https://www3.nissan.co.jp/vehicles/new/dayz/performance_safety/360_safety_assist.html",
+      "brand_topic_category": "Safety, reliability and trust",
+      "page_type": "360 safety assist page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u054",
+      "url": "https://www3.nissan.co.jp/vehicles/new/kicks/performance_safety/nim.html",
+      "brand_topic_category": "Safety, reliability and trust",
+      "page_type": "safety/driver assistance page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u055",
+      "url": "https://www3.nissan.co.jp/vehicles/new/aura/performance_safety/360_safety_assist.html",
+      "brand_topic_category": "Safety, reliability and trust",
+      "page_type": "360 safety assist page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u056",
+      "url": "https://www3.nissan.co.jp/vehicles/new/x-trail/performance_safety/360_safety_assist.html",
+      "brand_topic_category": "Safety, reliability and trust",
+      "page_type": "360 safety assist page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u057",
+      "url": "https://www3.nissan.co.jp/vehicles/new/x-trail/performance_safety/propilot.html",
+      "brand_topic_category": "Safety, reliability and trust",
+      "page_type": "ADAS/ProPILOT page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u058",
+      "url": "https://www3.nissan.co.jp/vehicles/new/clipper_ev/performance_safety/advanced_safety.html",
+      "brand_topic_category": "Safety, reliability and trust",
+      "page_type": "advanced safety page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u059",
+      "url": "https://www2.nissan.co.jp/SP/TECHNOLOGY/PROPILOTPARK",
+      "brand_topic_category": "Safety, reliability and trust",
+      "page_type": "parking safety technology page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u060",
+      "url": "https://www2.nissan.co.jp/SP/TECHNOLOGY/ICC",
+      "brand_topic_category": "Safety, reliability and trust",
+      "page_type": "driver assistance technology page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u061",
+      "url": "https://www3.nissan.co.jp/vehicles/new/ariya-details/specifications/subsidy.html",
+      "brand_topic_category": "Value, offers, finance and total cost of ownership",
+      "page_type": "subsidy/pricing page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u062",
+      "url": "https://www3.nissan.co.jp/vehicles/new/leaf/specifications/subsidy.html",
+      "brand_topic_category": "Value, offers, finance and total cost of ownership",
+      "page_type": "subsidy/pricing page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u063",
+      "url": "https://www3.nissan.co.jp/vehicles/new/sakura/specifications/subsidy.html",
+      "brand_topic_category": "Value, offers, finance and total cost of ownership",
+      "page_type": "subsidy/pricing page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u064",
+      "url": "https://www3.nissan.co.jp/vehicles/new/ariya-details/specifications/comparison.html",
+      "brand_topic_category": "Value, offers, finance and total cost of ownership",
+      "page_type": "grade comparison page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u065",
+      "url": "https://www3.nissan.co.jp/vehicles/new/leaf/specifications/comparison.html",
+      "brand_topic_category": "Value, offers, finance and total cost of ownership",
+      "page_type": "grade comparison page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u066",
+      "url": "https://www3.nissan.co.jp/vehicles/new/note/specifications/comparison.html",
+      "brand_topic_category": "Value, offers, finance and total cost of ownership",
+      "page_type": "grade comparison page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u067",
+      "url": "https://www3.nissan.co.jp/vehicles/new/serena/specifications/comparison.html",
+      "brand_topic_category": "Value, offers, finance and total cost of ownership",
+      "page_type": "grade comparison page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u068",
+      "url": "https://www3.nissan.co.jp/vehicles/new/x-trail/specifications/comparison.html",
+      "brand_topic_category": "Value, offers, finance and total cost of ownership",
+      "page_type": "grade comparison page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u069",
+      "url": "https://www3.nissan.co.jp/vehicles/new/aura/specifications/comparison.html",
+      "brand_topic_category": "Value, offers, finance and total cost of ownership",
+      "page_type": "grade comparison page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u070",
+      "url": "https://www3.nissan.co.jp/vehicles/new/kicks/specifications/comparison.html",
+      "brand_topic_category": "Value, offers, finance and total cost of ownership",
+      "page_type": "grade comparison page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u071",
+      "url": "https://www.nissan.co.jp/CREDIT/BVC/DAYZ/index.html",
+      "brand_topic_category": "Value, offers, finance and total cost of ownership",
+      "page_type": "residual value credit page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u072",
+      "url": "https://www.nissan.co.jp/CREDIT/SUBSCRIPTION/ROOX",
+      "brand_topic_category": "Value, offers, finance and total cost of ownership",
+      "page_type": "subscription finance page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u073",
+      "url": "https://www.nissan.co.jp/CREDIT/SUBSCRIPTION/ELGRAND",
+      "brand_topic_category": "Value, offers, finance and total cost of ownership",
+      "page_type": "subscription finance page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u074",
+      "url": "https://www2.nissan.co.jp/EVENT/CAMPAIGN/25/H2",
+      "brand_topic_category": "Value, offers, finance and total cost of ownership",
+      "page_type": "finance campaign/offers page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    },
+    {
+      "url_id": "u075",
+      "url": "https://www2.nissan.co.jp/EVENT/PRIZE/26/01",
+      "brand_topic_category": "Value, offers, finance and total cost of ownership",
+      "page_type": "purchase incentive campaign page",
+      "source": "user_supplied_or_seed_inventory",
+      "audit_candidate": true
+    }
+  ],
+  "scope_policy": {
+    "brand_topic_category_count": 5,
+    "canonical_category_field": "brand_topic_category",
+    "journey_category_deprecated": true
+  }
+}

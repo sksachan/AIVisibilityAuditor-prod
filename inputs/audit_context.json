@@ -1,0 +1,1098 @@
+{
+  "brand": "Nissan",
+  "market": "JP",
+  "domain": "https://www.nissan.co.jp",
+  "schema_version": "1.0",
+  "audit_scope_type": "journey_query_portfolio",
+  "url_resolution_status": "generated_and_saved_to_task_memory",
+  "url_discovery_method": "Used provided Nissan_Japan_All_100_URLs_Journey_Mapped.json as canonical URL source; generated query-to-URL mappings and saved to /memories/querytoURLs.txt",
+  "query_policy": {
+    "source_preference": "Use existing QueryPortfolio.txt from task memory/context when available; if unavailable, generate portfolio as specified below.",
+    "generation_rules": {
+      "total_queries": 70,
+      "structure": "7 brand topic categories × (5 non_branded + 5 branded) queries each",
+      "language_and_context": "UK English phrasing with Japan buying context (mentions of Japan, cities, ownership norms where relevant)",
+      "tone": "Conversational, AI-search oriented (natural language questions and informational queries)",
+      "non_branded_requirements": {
+        "prohibited_terms": [
+          "Nissan",
+          "Ariya",
+          "Leaf",
+          "Sakura",
+          "Note",
+          "Aura",
+          "Kicks",
+          "X-Trail",
+          "Serena",
+          "Roox",
+          "Dayz",
+          "Elgrand",
+          "Caravan",
+          "NV200",
+          "Clipper",
+          "Atlas",
+          "GT-R",
+          "Z",
+          "Skyline",
+          "Nismo",
+          "e-POWER",
+          "e power",
+          "e-4ORCE",
+          "ProPILOT",
+          "NissanConnect"
+        ],
+        "behaviour": "Non-branded queries must not contain any of the prohibited terms or direct brand/model references; may include generic references like 'this car', 'electric SUV', 'family MPV'."
+      },
+      "branded_requirements": "May include brand, model, sub-brand or navigational intent (brand/model names allowed). Avoid inventing product facts or claims.",
+      "content_restrictions": [
+        "Do not crawl external sites or validate claims",
+        "Do not invent product facts, unsupported specifications, prices, ratings or awards",
+        "Do not include speculative or unverifiable technical claims",
+        "Return final output as valid JSON only (no markdown or additional formatting)"
+      ]
+    }
+  },
+  "queries": [
+    {
+      "query": "How far can modern small electric cars travel on a single charge for daily city driving in Japan?",
+      "query_type": "non_branded",
+      "brand_topic_category": "EV range, charging and battery confidence",
+      "mapped_url": "https://www3.nissan.co.jp/vehicles/new/leaf/range_and_charging.html",
+      "mapped_pages": [
+        "https://www3.nissan.co.jp/vehicles/new/leaf/range_and_charging.html"
+      ],
+      "journey_stage": "consideration",
+      "intent_type": "use_case_problem_led",
+      "answer_type": "explainer",
+      "commercial_value": "high",
+      "why_selected": "Selected because range, charging and battery assurance are high-friction EV purchase questions in Japan.",
+      "priority": "P1",
+      "query_id": "q001"
+    },
+    {
+      "query": "Typical home charger installation costs and technical requirements for EV owners in Japan?",
+      "query_type": "non_branded",
+      "brand_topic_category": "EV range, charging and battery confidence",
+      "mapped_url": "https://www.nissan.co.jp/EV/CHARGE_SUPPORT/ZESP3/renewable_energy.html",
+      "mapped_pages": [
+        "https://www.nissan.co.jp/EV/CHARGE_SUPPORT/ZESP3/renewable_energy.html"
+      ],
+      "journey_stage": "cost_value",
+      "intent_type": "value_pricing",
+      "answer_type": "explainer",
+      "commercial_value": "high",
+      "why_selected": "Selected because range, charging and battery assurance are high-friction EV purchase questions in Japan.",
+      "priority": "P1",
+      "query_id": "q002"
+    },
+    {
+      "query": "How long do DC fast chargers typically take to add range for midsize electric SUVs during long trips in Japan?",
+      "query_type": "non_branded",
+      "brand_topic_category": "EV range, charging and battery confidence",
+      "mapped_url": "https://www3.nissan.co.jp/vehicles/new/ariya-details/cruising-distance_charge.html",
+      "mapped_pages": [
+        "https://www3.nissan.co.jp/vehicles/new/ariya-details/cruising-distance_charge.html"
+      ],
+      "journey_stage": "consideration",
+      "intent_type": "use_case_problem_led",
+      "answer_type": "explainer",
+      "commercial_value": "high",
+      "why_selected": "Selected because range, charging and battery assurance are high-friction EV purchase questions in Japan.",
+      "priority": "P1",
+      "query_id": "q003"
+    },
+    {
+      "query": "What battery warranty terms are common for EVs sold in Japan and what do they usually cover?",
+      "query_type": "non_branded",
+      "brand_topic_category": "EV range, charging and battery confidence",
+      "mapped_url": "https://www3.nissan.co.jp/EV/MAINTENANCE",
+      "mapped_pages": [
+        "https://www3.nissan.co.jp/EV/MAINTENANCE"
+      ],
+      "journey_stage": "consideration",
+      "intent_type": "reliability_trust",
+      "answer_type": "explainer",
+      "commercial_value": "high",
+      "why_selected": "Selected because range, charging and battery assurance are high-friction EV purchase questions in Japan.",
+      "priority": "P1",
+      "query_id": "q004"
+    },
+    {
+      "query": "How to plan long-distance trips in Japan with public charging stops and recommended route apps?",
+      "query_type": "non_branded",
+      "brand_topic_category": "EV range, charging and battery confidence",
+      "mapped_url": "https://www3.nissan.co.jp/vehicles/new/ariya-details/cruising-distance_charge.html",
+      "mapped_pages": [
+        "https://www3.nissan.co.jp/vehicles/new/ariya-details/cruising-distance_charge.html"
+      ],
+      "journey_stage": "consideration",
+      "intent_type": "category_discovery",
+      "answer_type": "recommendation",
+      "commercial_value": "high",
+      "why_selected": "Selected because range, charging and battery assurance are high-friction EV purchase questions in Japan.",
+      "priority": "P1",
+      "query_id": "q005"
+    },
+    {
+      "query": "Nissan Ariya real-world range and energy use for Japanese city and highway driving",
+      "query_type": "branded",
+      "brand_topic_category": "EV range, charging and battery confidence",
+      "mapped_url": "https://www3.nissan.co.jp/vehicles/new/ariya-details/cruising-distance_charge.html",
+      "mapped_pages": [
+        "https://www3.nissan.co.jp/vehicles/new/ariya-details/cruising-distance_charge.html"
+      ],
+      "journey_stage": "consideration",
+      "intent_type": "use_case_problem_led",
+      "answer_type": "faq",
+      "commercial_value": "high",
+      "why_selected": "Selected because range, charging and battery assurance are high-friction EV purchase questions in Japan.",
+      "priority": "P1",
+      "query_id": "q006"
+    },
+    {
+      "query": "Nissan Leaf battery warranty coverage and conditions in Japan",
+      "query_type": "branded",
+      "brand_topic_category": "EV range, charging and battery confidence",
+      "mapped_url": "https://www3.nissan.co.jp/vehicles/new/leaf/range_and_charging.html",
+      "mapped_pages": [
+        "https://www3.nissan.co.jp/vehicles/new/leaf/range_and_charging.html"
+      ],
+      "journey_stage": "consideration",
+      "intent_type": "reliability_trust",
+      "answer_type": "explainer",
+      "commercial_value": "high",
+      "why_selected": "Selected because range, charging and battery assurance are high-friction EV purchase questions in Japan.",
+      "priority": "P1",
+      "query_id": "q007"
+    },
+    {
+      "query": "Nissan home charger installation guidance and recommended suppliers in Japan",
+      "query_type": "branded",
+      "brand_topic_category": "EV range, charging and battery confidence",
+      "mapped_url": "https://www3.nissan.co.jp/vehicles/new/ariya-details/cruising-distance_charge.html",
+      "mapped_pages": [
+        "https://www3.nissan.co.jp/vehicles/new/ariya-details/cruising-distance_charge.html"
+      ],
+      "journey_stage": "consideration",
+      "intent_type": "use_case_problem_led",
+      "answer_type": "recommendation",
+      "commercial_value": "high",
+      "why_selected": "Selected because range, charging and battery assurance are high-friction EV purchase questions in Japan.",
+      "priority": "P1",
+      "query_id": "q008"
+    },
+    {
+      "query": "Nissan Ariya compatibility with Japan public fast charging networks and connector types",
+      "query_type": "branded",
+      "brand_topic_category": "EV range, charging and battery confidence",
+      "mapped_url": "https://www3.nissan.co.jp/vehicles/new/ariya-details/cruising-distance_charge.html",
+      "mapped_pages": [
+        "https://www3.nissan.co.jp/vehicles/new/ariya-details/cruising-distance_charge.html"
+      ],
+      "journey_stage": "consideration",
+      "intent_type": "use_case_problem_led",
+      "answer_type": "explainer",
+      "commercial_value": "high",
+      "why_selected": "Selected because range, charging and battery assurance are high-friction EV purchase questions in Japan.",
+      "priority": "P1",
+      "query_id": "q009"
+    },
+    {
+      "query": "Nissan Leaf tips for maximising battery life and range in Japan's climate",
+      "query_type": "branded",
+      "brand_topic_category": "EV range, charging and battery confidence",
+      "mapped_url": "https://www3.nissan.co.jp/vehicles/new/leaf/v2h.html",
+      "mapped_pages": [
+        "https://www3.nissan.co.jp/vehicles/new/leaf/v2h.html"
+      ],
+      "journey_stage": "consideration",
+      "intent_type": "use_case_problem_led",
+      "answer_type": "checklist",
+      "commercial_value": "high",
+      "why_selected": "Selected because range, charging and battery assurance are high-friction EV purchase questions in Japan.",
+      "priority": "P1",
+      "query_id": "q010"
+    },
+    {
+      "query": "Hybrid vs petrol: which is cheaper to run for Japanese city commuters over 5 years?",
+      "query_type": "non_branded",
+      "brand_topic_category": "Hybrid / e-POWER running costs and powertrain choice",
+      "mapped_url": "https://www3.nissan.co.jp/vehicles/new/note/performance_safety/e-power.html",
+      "mapped_pages": [
+        "https://www3.nissan.co.jp/vehicles/new/note/performance_safety/e-power.html"
+      ],
+      "journey_stage": "cost_value",
+      "intent_type": "comparison",
+      "answer_type": "comparison",
+      "commercial_value": "high",
+      "why_selected": "Selected because powertrain choice and running-cost clarity influence Japan consideration and ownership economics.",
+      "priority": "P2",
+      "query_id": "q011"
+    },
+    {
+      "query": "Series-hybrid versus parallel-hybrid: which suits frequent stop-start city driving in Japan?",
+      "query_type": "non_branded",
+      "brand_topic_category": "Hybrid / e-POWER running costs and powertrain choice",
+      "mapped_url": "https://www3.nissan.co.jp/vehicles/new/note/performance_safety/e-power.html",
+      "mapped_pages": [
+        "https://www3.nissan.co.jp/vehicles/new/note/performance_safety/e-power.html"
+      ],
+      "journey_stage": "cost_value",
+      "intent_type": "comparison",
+      "answer_type": "comparison",
+      "commercial_value": "high",
+      "why_selected": "Selected because powertrain choice and running-cost clarity influence Japan consideration and ownership economics.",
+      "priority": "P2",
+      "query_id": "q012"
+    },
+    {
+      "query": "Fuel economy differences between small hybrids and petrol cars for urban routes in Japan",
+      "query_type": "non_branded",
+      "brand_topic_category": "Hybrid / e-POWER running costs and powertrain choice",
+      "mapped_url": "https://www3.nissan.co.jp/vehicles/new/note.html",
+      "mapped_pages": [
+        "https://www3.nissan.co.jp/vehicles/new/note.html"
+      ],
+      "journey_stage": "cost_value",
+      "intent_type": "comparison",
+      "answer_type": "comparison",
+      "commercial_value": "high",
+      "why_selected": "Selected because powertrain choice and running-cost clarity influence Japan consideration and ownership economics.",
+      "priority": "P2",
+      "query_id": "q013"
+    },
+    {
+      "query": "What are typical maintenance costs for hybrid powertrains in Japan compared to petrol engines?",
+      "query_type": "non_branded",
+      "brand_topic_category": "Hybrid / e-POWER running costs and powertrain choice",
+      "mapped_url": "https://www.nissan.co.jp/SERVICE/MAINTEPRO/EV",
+      "mapped_pages": [
+        "https://www.nissan.co.jp/SERVICE/MAINTEPRO/EV"
+      ],
+      "journey_stage": "cost_value",
+      "intent_type": "comparison",
+      "answer_type": "comparison",
+      "commercial_value": "high",
+      "why_selected": "Selected because powertrain choice and running-cost clarity influence Japan consideration and ownership economics.",
+      "priority": "P2",
+      "query_id": "q014"
+    },
+    {
+      "query": "Which powertrain is best for frequent short trips and stop-start traffic in Japanese cities?",
+      "query_type": "non_branded",
+      "brand_topic_category": "Hybrid / e-POWER running costs and powertrain choice",
+      "mapped_url": "https://www3.nissan.co.jp/vehicles/new/note/performance_safety/e-power.html",
+      "mapped_pages": [
+        "https://www3.nissan.co.jp/vehicles/new/note/performance_safety/e-power.html"
+      ],
+      "journey_stage": "cost_value",
+      "intent_type": "category_discovery",
+      "answer_type": "recommendation",
+      "commercial_value": "high",
+      "why_selected": "Selected because powertrain choice and running-cost clarity influence Japan consideration and ownership economics.",
+      "priority": "P2",
+      "query_id": "q015"
+    },
+    {
+      "query": "Nissan e-POWER running costs versus equivalent petrol models in Japan",
+      "query_type": "branded",
+      "brand_topic_category": "Hybrid / e-POWER running costs and powertrain choice",
+      "mapped_url": "https://www3.nissan.co.jp/vehicles/new/note.html",
+      "mapped_pages": [
+        "https://www3.nissan.co.jp/vehicles/new/note.html"
+      ],
+      "journey_stage": "consideration",
+      "intent_type": "comparison",
+      "answer_type": "comparison",
+      "commercial_value": "high",
+      "why_selected": "Selected because powertrain choice and running-cost clarity influence Japan consideration and ownership economics.",
+      "priority": "P2",
+      "query_id": "q016"
+    },
+    {
+      "query": "How does Nissan e-POWER work and what maintenance does it require in Japan?",
+      "query_type": "branded",
+      "brand_topic_category": "Hybrid / e-POWER running costs and powertrain choice",
+      "mapped_url": "https://www3.nissan.co.jp/vehicles/new/note/performance_safety/e-power.html",
+      "mapped_pages": [
+        "https://www3.nissan.co.jp/vehicles/new/note/performance_safety/e-power.html"
+      ],
+      "journey_stage": "consideration",
+      "intent_type": "reliability_trust",
+      "answer_type": "explainer",
+      "commercial_value": "high",
+      "why_selected": "Selected because powertrain choice and running-cost clarity influence Japan consideration and ownership economics.",
+      "priority": "P2",
+      "query_id": "q017"
+    },
+    {
+      "query": "Nissan hybrid model fuel economy figures and real-world performance in Japan",
+      "query_type": "branded",
+      "brand_topic_category": "Hybrid / e-POWER running costs and powertrain choice",
+      "mapped_url": "https://www3.nissan.co.jp/vehicles/new/note.html",
+      "mapped_pages": [
+        "https://www3.nissan.co.jp/vehicles/new/note.html"
+      ],
+      "journey_stage": "consideration",
+      "intent_type": "comparison",
+      "answer_type": "faq",
+      "commercial_value": "high",
+      "why_selected": "Selected because powertrain choice and running-cost clarity influence Japan consideration and ownership economics.",
+      "priority": "P2",
+      "query_id": "q018"
+    },
+    {
+      "query": "Which Nissan e-POWER model is recommended for heavy urban traffic and frequent stops in Japan?",
+      "query_type": "branded",
+      "brand_topic_category": "Hybrid / e-POWER running costs and powertrain choice",
+      "mapped_url": "https://www3.nissan.co.jp/vehicles/new/note.html",
+      "mapped_pages": [
+        "https://www3.nissan.co.jp/vehicles/new/note.html"
+      ],
+      "journey_stage": "consideration",
+      "intent_type": "use_case_problem_led",
+      "answer_type": "recommendation",
+      "commercial_value": "high",
+      "why_selected": "Selected because powertrain choice and running-cost clarity influence Japan consideration and ownership economics.",
+      "priority": "P2",
+      "query_id": "q019"
+    },
+    {
+      "query": "Compare Nissan e-POWER vs conventional hybrid systems for hill starts and steep roads",
+      "query_type": "branded",
+      "brand_topic_category": "Hybrid / e-POWER running costs and powertrain choice",
+      "mapped_url": "https://www3.nissan.co.jp/vehicles/new/x-trail/performance_safety/e-4orce.html",
+      "mapped_pages": [
+        "https://www3.nissan.co.jp/vehicles/new/x-trail/performance_safety/e-4orce.html"
+      ],
+      "journey_stage": "consideration",
+      "intent_type": "comparison",
+      "answer_type": "comparison",
+      "commercial_value": "high",
+      "why_selected": "Selected because powertrain choice and running-cost clarity influence Japan consideration and ownership economics.",
+      "priority": "P2",
+      "query_id": "q020"
+    },
+    {
+      "query": "Cars with flexible seating and enough room for child seats and large strollers for Japanese families",
+      "query_type": "non_branded",
+      "brand_topic_category": "Family practicality, space and comfort",
+      "mapped_url": "https://www3.nissan.co.jp/vehicles/new/serena/interior/seat.html",
+      "mapped_pages": [
+        "https://www3.nissan.co.jp/vehicles/new/serena/interior/seat.html"
+      ],
+      "journey_stage": "consideration",
+      "intent_type": "use_case_problem_led",
+      "answer_type": "faq",
+      "commercial_value": "high",
+      "why_selected": "Selected because family buyers need practical, use-case-led evidence on space, seating and comfort.",
+      "priority": "P1",
+      "query_id": "q021"
+    },
+    {
+      "query": "How much boot space do families need for weekend trips with two children in Japan?",
+      "query_type": "non_branded",
+      "brand_topic_category": "Family practicality, space and comfort",
+      "mapped_url": "https://www3.nissan.co.jp/vehicles/new/serena/equipment/luggage_storage.html",
+      "mapped_pages": [
+        "https://www3.nissan.co.jp/vehicles/new/serena/equipment/luggage_storage.html"
+      ],
+      "journey_stage": "consideration",
+      "intent_type": "use_case_problem_led",
+      "answer_type": "explainer",
+      "commercial_value": "high",
+      "why_selected": "Selected because family buyers need practical, use-case-led evidence on space, seating and comfort.",
+      "priority": "P1",
+      "query_id": "q022"
+    },
+    {
+      "query": "Which vehicles offer ISOFIX positions and easy child-seat access for Japanese family use?",
+      "query_type": "non_branded",
+      "brand_topic_category": "Family practicality, space and comfort",
+      "mapped_url": "https://www3.nissan.co.jp/vehicles/new/serena/interior/seat_arrangement.html",
+      "mapped_pages": [
+        "https://www3.nissan.co.jp/vehicles/new/serena/interior/seat_arrangement.html"
+      ],
+      "journey_stage": "consideration",
+      "intent_type": "category_discovery",
+      "answer_type": "recommendation",
+      "commercial_value": "high",
+      "why_selected": "Selected because family buyers need practical, use-case-led evidence on space, seating and comfort.",
+      "priority": "P1",
+      "query_id": "q023"
+    },
+    {
+      "query": "Best family cars for frequent long highway trips between Tokyo and regional areas in Japan",
+      "query_type": "non_branded",
+      "brand_topic_category": "Family practicality, space and comfort",
+      "mapped_url": "https://www3.nissan.co.jp/vehicles/new/elgrand/interior/interior_space.html",
+      "mapped_pages": [
+        "https://www3.nissan.co.jp/vehicles/new/elgrand/interior/interior_space.html"
+      ],
+      "journey_stage": "consideration",
+      "intent_type": "category_discovery",
+      "answer_type": "comparison",
+      "commercial_value": "high",
+      "why_selected": "Selected because family buyers need practical, use-case-led evidence on space, seating and comfort.",
+      "priority": "P1",
+      "query_id": "q024"
+    },
+    {
+      "query": "Small minivan alternatives suitable for school runs and shopping in crowded Japanese streets",
+      "query_type": "non_branded",
+      "brand_topic_category": "Family practicality, space and comfort",
+      "mapped_url": "https://www3.nissan.co.jp/vehicles/new/roox.html",
+      "mapped_pages": [
+        "https://www3.nissan.co.jp/vehicles/new/roox.html"
+      ],
+      "journey_stage": "consideration",
+      "intent_type": "use_case_problem_led",
+      "answer_type": "faq",
+      "commercial_value": "high",
+      "why_selected": "Selected because family buyers need practical, use-case-led evidence on space, seating and comfort.",
+      "priority": "P1",
+      "query_id": "q025"
+    },
+    {
+      "query": "Nissan Serena interior layout, seating flexibility and ISOFIX locations for families",
+      "query_type": "branded",
+      "brand_topic_category": "Family practicality, space and comfort",
+      "mapped_url": "https://www3.nissan.co.jp/vehicles/new/serena/interior/seat.html",
+      "mapped_pages": [
+        "https://www3.nissan.co.jp/vehicles/new/serena/interior/seat.html"
+      ],
+      "journey_stage": "consideration",
+      "intent_type": "use_case_problem_led",
+      "answer_type": "faq",
+      "commercial_value": "high",
+      "why_selected": "Selected because family buyers need practical, use-case-led evidence on space, seating and comfort.",
+      "priority": "P1",
+      "query_id": "q026"
+    },
+    {
+      "query": "Nissan X-Trail boot capacity and seat fold options for long family trips",
+      "query_type": "branded",
+      "brand_topic_category": "Family practicality, space and comfort",
+      "mapped_url": "https://www3.nissan.co.jp/vehicles/new/x-trail/interior/luggage_storage.html",
+      "mapped_pages": [
+        "https://www3.nissan.co.jp/vehicles/new/x-trail/interior/luggage_storage.html"
+      ],
+      "journey_stage": "consideration",
+      "intent_type": "use_case_problem_led",
+      "answer_type": "checklist",
+      "commercial_value": "high",
+      "why_selected": "Selected because family buyers need practical, use-case-led evidence on space, seating and comfort.",
+      "priority": "P1",
+      "query_id": "q027"
+    },
+    {
+      "query": "Nissan NV200 cargo and seating options when used as a family shuttle in Japan",
+      "query_type": "branded",
+      "brand_topic_category": "Family practicality, space and comfort",
+      "mapped_url": "https://www3.nissan.co.jp/vehicles/new/nv200vanette/interior/loadability.html",
+      "mapped_pages": [
+        "https://www3.nissan.co.jp/vehicles/new/nv200vanette/interior/loadability.html"
+      ],
+      "journey_stage": "consideration",
+      "intent_type": "use_case_problem_led",
+      "answer_type": "faq",
+      "commercial_value": "high",
+      "why_selected": "Selected because family buyers need practical, use-case-led evidence on space, seating and comfort.",
+      "priority": "P1",
+      "query_id": "q028"
+    },
+    {
+      "query": "Nissan Elgrand long-trip comfort features and seating arrangements for multi-passenger travel",
+      "query_type": "branded",
+      "brand_topic_category": "Family practicality, space and comfort",
+      "mapped_url": "https://www3.nissan.co.jp/vehicles/new/elgrand/interior/interior_space.html",
+      "mapped_pages": [
+        "https://www3.nissan.co.jp/vehicles/new/elgrand/interior/interior_space.html"
+      ],
+      "journey_stage": "consideration",
+      "intent_type": "use_case_problem_led",
+      "answer_type": "explainer",
+      "commercial_value": "high",
+      "why_selected": "Selected because family buyers need practical, use-case-led evidence on space, seating and comfort.",
+      "priority": "P1",
+      "query_id": "q029"
+    },
+    {
+      "query": "What ADAS features reduce low-speed city collisions in Japan and how do they work?",
+      "query_type": "non_branded",
+      "brand_topic_category": "Safety, reliability and trust",
+      "mapped_url": "https://www3.nissan.co.jp/vehicles/new/ariya-details/performance_safety/360_safety_assist.html",
+      "mapped_pages": [
+        "https://www3.nissan.co.jp/vehicles/new/ariya-details/performance_safety/360_safety_assist.html"
+      ],
+      "journey_stage": "trust_safety",
+      "intent_type": "reliability_trust",
+      "answer_type": "explainer",
+      "commercial_value": "high",
+      "why_selected": "Selected because safety, reliability and warranty proof are key trust signals in AI-led vehicle research.",
+      "priority": "P1",
+      "query_id": "q030"
+    },
+    {
+      "query": "How to interpret Japanese crash-test ratings and what should families prioritise?",
+      "query_type": "non_branded",
+      "brand_topic_category": "Safety, reliability and trust",
+      "mapped_url": "https://www2.nissan.co.jp/SP/TECHNOLOGY/ICC",
+      "mapped_pages": [
+        "https://www2.nissan.co.jp/SP/TECHNOLOGY/ICC"
+      ],
+      "journey_stage": "trust_safety",
+      "intent_type": "reliability_trust",
+      "answer_type": "explainer",
+      "commercial_value": "high",
+      "why_selected": "Selected because safety, reliability and warranty proof are key trust signals in AI-led vehicle research.",
+      "priority": "P1",
+      "query_id": "q031"
+    },
+    {
+      "query": "Common reliability issues to check when buying a used car in Japan and how to spot them",
+      "query_type": "non_branded",
+      "brand_topic_category": "Safety, reliability and trust",
+      "mapped_url": "https://www3.nissan.co.jp/connect/service_ariya/faq.html",
+      "mapped_pages": [
+        "https://www3.nissan.co.jp/connect/service_ariya/faq.html"
+      ],
+      "journey_stage": "trust_safety",
+      "intent_type": "reliability_trust",
+      "answer_type": "explainer",
+      "commercial_value": "high",
+      "why_selected": "Selected because safety, reliability and warranty proof are key trust signals in AI-led vehicle research.",
+      "priority": "P1",
+      "query_id": "q032"
+    },
+    {
+      "query": "How long are typical powertrain and battery warranties for vehicles sold in Japan?",
+      "query_type": "non_branded",
+      "brand_topic_category": "Safety, reliability and trust",
+      "mapped_url": "https://www3.nissan.co.jp/EV/MAINTENANCE",
+      "mapped_pages": [
+        "https://www3.nissan.co.jp/EV/MAINTENANCE"
+      ],
+      "journey_stage": "trust_safety",
+      "intent_type": "reliability_trust",
+      "answer_type": "explainer",
+      "commercial_value": "high",
+      "why_selected": "Selected because safety, reliability and warranty proof are key trust signals in AI-led vehicle research.",
+      "priority": "P1",
+      "query_id": "q033"
+    },
+    {
+      "query": "Questions to ask a dealer about safety feature calibration and software updates before buying",
+      "query_type": "non_branded",
+      "brand_topic_category": "Safety, reliability and trust",
+      "mapped_url": "https://www3.nissan.co.jp/connect/service_ariya/faq.html",
+      "mapped_pages": [
+        "https://www3.nissan.co.jp/connect/service_ariya/faq.html"
+      ],
+      "journey_stage": "trust_safety",
+      "intent_type": "reliability_trust",
+      "answer_type": "checklist",
+      "commercial_value": "high",
+      "why_selected": "Selected because safety, reliability and warranty proof are key trust signals in AI-led vehicle research.",
+      "priority": "P1",
+      "query_id": "q034"
+    },
+    {
+      "query": "Nissan ProPILOT features and real-world performance on Japanese expressways",
+      "query_type": "branded",
+      "brand_topic_category": "Safety, reliability and trust",
+      "mapped_url": "https://www3.nissan.co.jp/vehicles/new/x-trail/performance_safety/propilot.html",
+      "mapped_pages": [
+        "https://www3.nissan.co.jp/vehicles/new/x-trail/performance_safety/propilot.html"
+      ],
+      "journey_stage": "trust_safety",
+      "intent_type": "reliability_trust",
+      "answer_type": "explainer",
+      "commercial_value": "high",
+      "why_selected": "Selected because safety, reliability and warranty proof are key trust signals in AI-led vehicle research.",
+      "priority": "P1",
+      "query_id": "q035"
+    },
+    {
+      "query": "Nissan crash test results and any safety awards for Japan-market models",
+      "query_type": "branded",
+      "brand_topic_category": "Safety, reliability and trust",
+      "mapped_url": "https://www3.nissan.co.jp/vehicles/new/ariya-details/performance_safety/360_safety_assist.html",
+      "mapped_pages": [
+        "https://www3.nissan.co.jp/vehicles/new/ariya-details/performance_safety/360_safety_assist.html"
+      ],
+      "journey_stage": "trust_safety",
+      "intent_type": "reliability_trust",
+      "answer_type": "faq",
+      "commercial_value": "high",
+      "why_selected": "Selected because safety, reliability and warranty proof are key trust signals in AI-led vehicle research.",
+      "priority": "P1",
+      "query_id": "q036"
+    },
+    {
+      "query": "Nissan warranty coverage details for powertrain and battery in Japan",
+      "query_type": "branded",
+      "brand_topic_category": "Safety, reliability and trust",
+      "mapped_url": "https://www3.nissan.co.jp/EV/MAINTENANCE",
+      "mapped_pages": [
+        "https://www3.nissan.co.jp/EV/MAINTENANCE"
+      ],
+      "journey_stage": "trust_safety",
+      "intent_type": "reliability_trust",
+      "answer_type": "explainer",
+      "commercial_value": "high",
+      "why_selected": "Selected because safety, reliability and warranty proof are key trust signals in AI-led vehicle research.",
+      "priority": "P1",
+      "query_id": "q037"
+    },
+    {
+      "query": "Nissan reliability record and common service items for owners in Japan",
+      "query_type": "branded",
+      "brand_topic_category": "Safety, reliability and trust",
+      "mapped_url": "https://www3.nissan.co.jp/connect/service_leaf/faq.html",
+      "mapped_pages": [
+        "https://www3.nissan.co.jp/connect/service_leaf/faq.html"
+      ],
+      "journey_stage": "trust_safety",
+      "intent_type": "reliability_trust",
+      "answer_type": "faq",
+      "commercial_value": "high",
+      "why_selected": "Selected because safety, reliability and warranty proof are key trust signals in AI-led vehicle research.",
+      "priority": "P1",
+      "query_id": "q038"
+    },
+    {
+      "query": "How to calculate total cost of ownership for a compact car in Japan over 5 years?",
+      "query_type": "non_branded",
+      "brand_topic_category": "Value, offers, finance and total cost of ownership",
+      "mapped_url": "https://www.nissan.co.jp/CREDIT/BVC/DAYZ/index.html",
+      "mapped_pages": [
+        "https://www.nissan.co.jp/CREDIT/BVC/DAYZ/index.html"
+      ],
+      "journey_stage": "cost_value",
+      "intent_type": "value_pricing",
+      "answer_type": "calculation",
+      "commercial_value": "high",
+      "why_selected": "Selected because finance, subsidies, resale and TCO questions indicate high commercial intent.",
+      "priority": "P2",
+      "query_id": "q039"
+    },
+    {
+      "query": "Typical PCP and lease terms available for family cars in Japan and how to compare them",
+      "query_type": "non_branded",
+      "brand_topic_category": "Value, offers, finance and total cost of ownership",
+      "mapped_url": "https://www.nissan.co.jp/CREDIT/SUBSCRIPTION/ROOX",
+      "mapped_pages": [
+        "https://www.nissan.co.jp/CREDIT/SUBSCRIPTION/ROOX"
+      ],
+      "journey_stage": "cost_value",
+      "intent_type": "comparison",
+      "answer_type": "comparison",
+      "commercial_value": "high",
+      "why_selected": "Selected because finance, subsidies, resale and TCO questions indicate high commercial intent.",
+      "priority": "P2",
+      "query_id": "q040"
+    },
+    {
+      "query": "How do government EV subsidies and tax breaks in Japan affect monthly payments?",
+      "query_type": "non_branded",
+      "brand_topic_category": "Value, offers, finance and total cost of ownership",
+      "mapped_url": "https://www3.nissan.co.jp/vehicles/new/ariya-details/specifications/subsidy.html",
+      "mapped_pages": [
+        "https://www3.nissan.co.jp/vehicles/new/ariya-details/specifications/subsidy.html"
+      ],
+      "journey_stage": "cost_value",
+      "intent_type": "value_pricing",
+      "answer_type": "calculation",
+      "commercial_value": "high",
+      "why_selected": "Selected because finance, subsidies, resale and TCO questions indicate high commercial intent.",
+      "priority": "P2",
+      "query_id": "q041"
+    },
+    {
+      "query": "Insurance cost differences between kei cars and compact cars in Japan",
+      "query_type": "non_branded",
+      "brand_topic_category": "Value, offers, finance and total cost of ownership",
+      "mapped_url": "https://www2.nissan.co.jp/EVENT/CAMPAIGN/25/H2",
+      "mapped_pages": [
+        "https://www2.nissan.co.jp/EVENT/CAMPAIGN/25/H2"
+      ],
+      "journey_stage": "cost_value",
+      "intent_type": "comparison",
+      "answer_type": "comparison",
+      "commercial_value": "high",
+      "why_selected": "Selected because finance, subsidies, resale and TCO questions indicate high commercial intent.",
+      "priority": "P2",
+      "query_id": "q042"
+    },
+    {
+      "query": "Resale value factors that most affect small SUVs in the Japanese market",
+      "query_type": "non_branded",
+      "brand_topic_category": "Value, offers, finance and total cost of ownership",
+      "mapped_url": "https://www3.nissan.co.jp/vehicles/new/ariya-details/specifications/comparison.html",
+      "mapped_pages": [
+        "https://www3.nissan.co.jp/vehicles/new/ariya-details/specifications/comparison.html"
+      ],
+      "journey_stage": "cost_value",
+      "intent_type": "value_pricing",
+      "answer_type": "faq",
+      "commercial_value": "high",
+      "why_selected": "Selected because finance, subsidies, resale and TCO questions indicate high commercial intent.",
+      "priority": "P2",
+      "query_id": "q043"
+    },
+    {
+      "query": "Nissan offers and finance deals for new models in Japan today",
+      "query_type": "branded",
+      "brand_topic_category": "Value, offers, finance and total cost of ownership",
+      "mapped_url": "https://www2.nissan.co.jp/EVENT/CAMPAIGN/25/H2",
+      "mapped_pages": [
+        "https://www2.nissan.co.jp/EVENT/CAMPAIGN/25/H2"
+      ],
+      "journey_stage": "cost_value",
+      "intent_type": "value_pricing",
+      "answer_type": "faq",
+      "commercial_value": "high",
+      "why_selected": "Selected because finance, subsidies, resale and TCO questions indicate high commercial intent.",
+      "priority": "P2",
+      "query_id": "q044"
+    },
+    {
+      "query": "Nissan leasing and PCP options available at Japanese dealers and how to choose between them",
+      "query_type": "branded",
+      "brand_topic_category": "Value, offers, finance and total cost of ownership",
+      "mapped_url": "https://www.nissan.co.jp/CREDIT/BVC/DAYZ/index.html",
+      "mapped_pages": [
+        "https://www.nissan.co.jp/CREDIT/BVC/DAYZ/index.html"
+      ],
+      "journey_stage": "cost_value",
+      "intent_type": "value_pricing",
+      "answer_type": "comparison",
+      "commercial_value": "high",
+      "why_selected": "Selected because finance, subsidies, resale and TCO questions indicate high commercial intent.",
+      "priority": "P2",
+      "query_id": "q045"
+    },
+    {
+      "query": "Nissan e-POWER model running costs and estimated resale value in Japan",
+      "query_type": "branded",
+      "brand_topic_category": "Value, offers, finance and total cost of ownership",
+      "mapped_url": "https://www3.nissan.co.jp/vehicles/new/note/specifications/comparison.html",
+      "mapped_pages": [
+        "https://www3.nissan.co.jp/vehicles/new/note/specifications/comparison.html"
+      ],
+      "journey_stage": "cost_value",
+      "intent_type": "value_pricing",
+      "answer_type": "calculation",
+      "commercial_value": "high",
+      "why_selected": "Selected because finance, subsidies, resale and TCO questions indicate high commercial intent.",
+      "priority": "P2",
+      "query_id": "q046"
+    },
+    {
+      "query": "Nissan EV subsidy eligibility and how it applies to Nissan purchases in Japan",
+      "query_type": "branded",
+      "brand_topic_category": "Value, offers, finance and total cost of ownership",
+      "mapped_url": "https://www3.nissan.co.jp/vehicles/new/ariya-details/specifications/subsidy.html",
+      "mapped_pages": [
+        "https://www3.nissan.co.jp/vehicles/new/ariya-details/specifications/subsidy.html"
+      ],
+      "journey_stage": "cost_value",
+      "intent_type": "value_pricing",
+      "answer_type": "explainer",
+      "commercial_value": "high",
+      "why_selected": "Selected because finance, subsidies, resale and TCO questions indicate high commercial intent.",
+      "priority": "P2",
+      "query_id": "q047"
+    },
+    {
+      "query": "Nissan Roox compact family car review for city parking in Japan",
+      "query_type": "branded",
+      "brand_topic_category": "Family practicality, space and comfort",
+      "mapped_url": "https://www3.nissan.co.jp/vehicles/new/roox.html",
+      "mapped_pages": [
+        "https://www3.nissan.co.jp/vehicles/new/roox.html"
+      ],
+      "journey_stage": "consideration",
+      "intent_type": "use_case_problem_led",
+      "answer_type": "faq",
+      "commercial_value": "high",
+      "why_selected": "Selected because family buyers need practical, use-case-led evidence on space, seating and comfort.",
+      "priority": "P1",
+      "query_id": "q048"
+    },
+    {
+      "query": "How Nissan's safety systems compare with competitors in Japanese crash tests",
+      "query_type": "branded",
+      "brand_topic_category": "Safety, reliability and trust",
+      "mapped_url": "https://www3.nissan.co.jp/vehicles/new/ariya-details/performance_safety/360_safety_assist.html",
+      "mapped_pages": [
+        "https://www3.nissan.co.jp/vehicles/new/ariya-details/performance_safety/360_safety_assist.html"
+      ],
+      "journey_stage": "trust_safety",
+      "intent_type": "comparison",
+      "answer_type": "comparison",
+      "commercial_value": "high",
+      "why_selected": "Selected because safety, reliability and warranty proof are key trust signals in AI-led vehicle research.",
+      "priority": "P1",
+      "query_id": "q049"
+    },
+    {
+      "query": "Estimating running costs for a Nissan Leaf over five years in Japan",
+      "query_type": "branded",
+      "brand_topic_category": "Value, offers, finance and total cost of ownership",
+      "mapped_url": "https://www3.nissan.co.jp/vehicles/new/leaf/specifications/comparison.html",
+      "mapped_pages": [
+        "https://www3.nissan.co.jp/vehicles/new/leaf/specifications/comparison.html"
+      ],
+      "journey_stage": "cost_value",
+      "intent_type": "value_pricing",
+      "answer_type": "calculation",
+      "commercial_value": "high",
+      "why_selected": "Selected because finance, subsidies, resale and TCO questions indicate high commercial intent.",
+      "priority": "P2",
+      "query_id": "q050"
+    }
+  ],
+  "pages": [
+    "https://www3.nissan.co.jp/vehicles/new/ariya-details/cruising-distance_charge.html",
+    "https://www3.nissan.co.jp/vehicles/new/leaf/range_and_charging.html",
+    "https://www3.nissan.co.jp/vehicles/new/sakura/range_and_charging.html",
+    "https://www3.nissan.co.jp/vehicles/new/clipper_ev/charge_cruising-distance.html",
+    "https://www3.nissan.co.jp/vehicles/new/clipper_ev/charge_cruising-distance/cruising-distance_battery.html",
+    "https://www3.nissan.co.jp/vehicles/new/clipper_ev/charge_cruising-distance/charging_method.html",
+    "https://www3.nissan.co.jp/vehicles/new/leaf/v2h.html",
+    "https://www3.nissan.co.jp/vehicles/new/ariya.html",
+    "https://www3.nissan.co.jp/vehicles/new/leaf.html",
+    "https://www3.nissan.co.jp/vehicles/new/sakura.html",
+    "https://www3.nissan.co.jp/vehicles/new/clipper_ev.html",
+    "https://www3.nissan.co.jp/optional-parts/vehicles/ariya/etc/charge_item.html",
+    "https://www.nissan.co.jp/EV/CHARGE_SUPPORT/ZESP3/renewable_energy.html",
+    "https://www.nissan.co.jp/EV/MAINTENANCE",
+    "https://www.nissan.co.jp/SERVICE/MAINTEPRO/EV",
+    "https://www2.nissan.co.jp/CONNECT/SERVICE/CONVENIENT/evsupport.html",
+    "https://www3.nissan.co.jp/vehicles/new/note/performance_safety/e-power.html",
+    "https://www3.nissan.co.jp/vehicles/new/note/performance_safety/e-power_4wd.html",
+    "https://www3.nissan.co.jp/vehicles/new/aura/performance_safety/e-power.html",
+    "https://www3.nissan.co.jp/vehicles/new/aura/performance_safety/e-power_4wd.html",
+    "https://www3.nissan.co.jp/vehicles/new/kicks/performance_safety/e-power.html",
+    "https://www3.nissan.co.jp/vehicles/new/x-trail/performance_safety/e-power.html",
+    "https://www3.nissan.co.jp/vehicles/new/x-trail/performance_safety/e-4orce.html",
+    "https://www3.nissan.co.jp/vehicles/new/serena/performance_safety/e-4orce.html",
+    "https://www3.nissan.co.jp/vehicles/new/note.html",
+    "https://www3.nissan.co.jp/vehicles/new/aura.html",
+    "https://www3.nissan.co.jp/vehicles/new/kicks.html",
+    "https://www3.nissan.co.jp/vehicles/new/x-trail.html",
+    "https://www3.nissan.co.jp/vehicles/new/serena.html",
+    "https://www3.nissan.co.jp/vehicles/new/serena/interior/seat.html",
+    "https://www3.nissan.co.jp/vehicles/new/serena/interior/seat_arrangement.html",
+    "https://www3.nissan.co.jp/vehicles/new/serena/interior/comfort.html",
+    "https://www3.nissan.co.jp/vehicles/new/serena/equipment/luggage_storage.html",
+    "https://www3.nissan.co.jp/vehicles/new/x-trail/interior/luggage_storage.html",
+    "https://www3.nissan.co.jp/vehicles/new/x-trail/interior.html",
+    "https://www3.nissan.co.jp/vehicles/new/elgrand.html",
+    "https://www3.nissan.co.jp/vehicles/new/elgrand/interior/interior_space.html",
+    "https://www3.nissan.co.jp/vehicles/new/elgrand/interior/amenity.html",
+    "https://www3.nissan.co.jp/vehicles/new/caravan/loadability_comfort/loadability.html",
+    "https://www3.nissan.co.jp/vehicles/new/caravan/loadability_comfort/comfort.html",
+    "https://www3.nissan.co.jp/vehicles/new/caravan/interior/seat_arrangement.html",
+    "https://www3.nissan.co.jp/vehicles/new/nv200vanette/interior/loadability.html",
+    "https://www3.nissan.co.jp/vehicles/new/nv200vanette/interior/comfort.html",
+    "https://www3.nissan.co.jp/vehicles/new/roox/interior/storage_luggage.html",
+    "https://www3.nissan.co.jp/vehicles/new/dayz/interior/utility.html",
+    "https://www3.nissan.co.jp/vehicles/new/ariya-details/performance_safety/360_safety_assist.html",
+    "https://www3.nissan.co.jp/vehicles/new/leaf/performance_safety/360_safety_assist.html",
+    "https://www3.nissan.co.jp/vehicles/new/note/performance_safety/360_safety_assist.html",
+    "https://www3.nissan.co.jp/vehicles/new/serena/performance_safety/360_safety_assist.html",
+    "https://www3.nissan.co.jp/vehicles/new/sakura/safety/360_safety_assist.html",
+    "https://www3.nissan.co.jp/vehicles/new/sakura/safety/propilot.html",
+    "https://www3.nissan.co.jp/vehicles/new/roox/performance_safety/360_safety_assist.html",
+    "https://www3.nissan.co.jp/vehicles/new/dayz/performance_safety/360_safety_assist.html",
+    "https://www3.nissan.co.jp/vehicles/new/kicks/performance_safety/nim.html",
+    "https://www3.nissan.co.jp/vehicles/new/aura/performance_safety/360_safety_assist.html",
+    "https://www3.nissan.co.jp/vehicles/new/x-trail/performance_safety/360_safety_assist.html",
+    "https://www3.nissan.co.jp/vehicles/new/x-trail/performance_safety/propilot.html",
+    "https://www3.nissan.co.jp/vehicles/new/clipper_ev/performance_safety/advanced_safety.html",
+    "https://www2.nissan.co.jp/SP/TECHNOLOGY/PROPILOTPARK",
+    "https://www2.nissan.co.jp/SP/TECHNOLOGY/ICC",
+    "https://www3.nissan.co.jp/vehicles/new/ariya-details/specifications/subsidy.html",
+    "https://www3.nissan.co.jp/vehicles/new/leaf/specifications/subsidy.html",
+    "https://www3.nissan.co.jp/vehicles/new/sakura/specifications/subsidy.html",
+    "https://www3.nissan.co.jp/vehicles/new/ariya-details/specifications/comparison.html",
+    "https://www3.nissan.co.jp/vehicles/new/leaf/specifications/comparison.html",
+    "https://www3.nissan.co.jp/vehicles/new/note/specifications/comparison.html",
+    "https://www3.nissan.co.jp/vehicles/new/serena/specifications/comparison.html",
+    "https://www3.nissan.co.jp/vehicles/new/x-trail/specifications/comparison.html",
+    "https://www3.nissan.co.jp/vehicles/new/aura/specifications/comparison.html",
+    "https://www3.nissan.co.jp/vehicles/new/kicks/specifications/comparison.html",
+    "https://www.nissan.co.jp/CREDIT/BVC/DAYZ/index.html",
+    "https://www.nissan.co.jp/CREDIT/SUBSCRIPTION/ROOX",
+    "https://www.nissan.co.jp/CREDIT/SUBSCRIPTION/ELGRAND",
+    "https://www2.nissan.co.jp/EVENT/CAMPAIGN/25/H2",
+    "https://www2.nissan.co.jp/EVENT/PRIZE/26/01",
+    "https://www3.nissan.co.jp/vehicles/new/sakura/ease_of_driving.html",
+    "https://www3.nissan.co.jp/vehicles/new/dayz.html",
+    "https://www3.nissan.co.jp/vehicles/new/roox.html",
+    "https://www3.nissan.co.jp/vehicles/new/note/exterior.html",
+    "https://www3.nissan.co.jp/vehicles/new/sakura/exterior.html",
+    "https://www3.nissan.co.jp/vehicles/new/aura_driving.html",
+    "https://www3.nissan.co.jp/vehicles/new/aura_design.html",
+    "https://www3.nissan.co.jp/vehicles/new/kicks/exterior.html",
+    "https://www3.nissan.co.jp/vehicles/new/dayz/performance_safety/ease_of_driving.html",
+    "https://www3.nissan.co.jp/vehicles/new/sakura/interior/storage_luggage.html",
+    "https://www2.nissan.co.jp/SP/KEI",
+    "https://www2.nissan.co.jp/SP/TECHNOLOGY/PPRP",
+    "https://www2.nissan.co.jp/SP/DAYZ/COLORFUL",
+    "https://www3.nissan.co.jp/vehicles/new/ariya-details/connect.html",
+    "https://www3.nissan.co.jp/vehicles/new/leaf/connect.html",
+    "https://www3.nissan.co.jp/vehicles/new/note/connect.html",
+    "https://www3.nissan.co.jp/vehicles/new/serena/connect.html",
+    "https://www3.nissan.co.jp/vehicles/new/sakura/nissan_connect.html",
+    "https://www3.nissan.co.jp/vehicles/new/roox/connect.html",
+    "https://www3.nissan.co.jp/vehicles/new/aura/connect.html",
+    "https://www3.nissan.co.jp/vehicles/new/x-trail/connect.html",
+    "https://www3.nissan.co.jp/connect/service_ariya/faq.html",
+    "https://www3.nissan.co.jp/connect/service_leaf/faq.html",
+    "https://www.nissan.co.jp/CONNECT/MEMBER/QA",
+    "https://www.nissan.co.jp/SERVICE/MAINTEPRO/EV-ANSHIN-PRE"
+  ],
+  "rejected_url_candidates": [],
+  "portfolio_summary": {
+    "total_categories_considered": 7,
+    "categories_selected_for_audit": 7,
+    "non_branded_queries_generated": 35,
+    "branded_queries_generated": 35,
+    "total_queries_generated": 70,
+    "owned_pages_count": 100,
+    "selection_rule": "7 brand topic categories × 5 non-branded + 5 branded queries; 100 owned URLs from prior audit context output object",
+    "recommended_audit_shortlist_queries": 70
+  },
+  "evidence_sources": [
+    "/app/temp/pfe1feffa-9f91-45ee-8957-9f6e6d910c6c/939d3096-d9f0-4e65-b847-2a054e172f1f/adfdcff1-2167-4ea8-ae17-ebd48db0fd0c/files/Nissan_Japan_All_100_URLs_Journey_Mapped.json",
+    "/memories/QueryPortfolio.txt",
+    "/memories/querytoURLs.txt"
+  ],
+  "validation": {
+    "counts_check": {
+      "expected_total": 70,
+      "actual_total": 70,
+      "expected_non_branded_total": 35,
+      "actual_non_branded_total": 35,
+      "expected_branded_total": 35,
+      "actual_branded_total": 35,
+      "expected_owned_pages": 100,
+      "actual_owned_pages": 100
+    },
+    "journey_query_counts": {
+      "EV range, charging and battery confidence": {
+        "non_branded": 5,
+        "branded": 5
+      },
+      "Hybrid / e-POWER running costs and powertrain choice": {
+        "non_branded": 5,
+        "branded": 5
+      },
+      "Family practicality, space and comfort": {
+        "non_branded": 5,
+        "branded": 5
+      },
+      "Safety, reliability and trust": {
+        "non_branded": 5,
+        "branded": 5
+      },
+      "Value, offers, finance and total cost of ownership": {
+        "non_branded": 5,
+        "branded": 5
+      },
+      "Urban mobility and compact car fit": {
+        "non_branded": 5,
+        "branded": 5
+      },
+      "Ownership, service and aftersales confidence": {
+        "non_branded": 5,
+        "branded": 5
+      }
+    },
+    "source_note": "Audit Context string in previous run output contained 66 parsed queries but declared 70. Four missing branded queries were completed from the Query Portfolio section in the same previous run output and mapped to owned URLs already present in pages[]."
+  },
+  "notes": {
+    "source": "Constructed from outputs (23).json previous run object.",
+    "completion_note": "Four branded gaps were completed from the Query Portfolio output because the Audit Context variable was parseable only after adding a closing brace and contained 66 query objects.",
+    "ready_for": "local_ai_visibility/inputs/audit_context.json"
+  },
+  "brand_topic_coverage": [
+    {
+      "brand_topic_category": "EV range, charging and battery confidence",
+      "category_priority": "P1",
+      "selected_for_audit": true,
+      "why_relevant": "EV purchase decisions in Japan depend heavily on range, charging infrastructure, battery warranties and home charging readiness.",
+      "likely_owned_page_types": [
+        "EV range/charging page",
+        "EV model page",
+        "battery/warranty page",
+        "EV guide"
+      ]
+    },
+    {
+      "brand_topic_category": "Hybrid / e-POWER running costs and powertrain choice",
+      "category_priority": "P2",
+      "selected_for_audit": true,
+      "why_relevant": "Powertrain choice affects running costs, urban performance and ownership economics for many Japanese buyers.",
+      "likely_owned_page_types": [
+        "Powertrain comparison page",
+        "hybrid model page",
+        "specifications page",
+        "running-cost guide"
+      ]
+    },
+    {
+      "brand_topic_category": "Family practicality, space and comfort",
+      "category_priority": "P1",
+      "selected_for_audit": true,
+      "why_relevant": "Families prioritise space, seating flexibility, boot capacity and child-seat compatibility when choosing vehicles in Japan.",
+      "likely_owned_page_types": [
+        "Interior/boot page",
+        "family SUV/minivan model page",
+        "specifications page",
+        "buying guide"
+      ]
+    },
+    {
+      "brand_topic_category": "Safety, reliability and trust",
+      "category_priority": "P1",
+      "selected_for_audit": true,
+      "why_relevant": "Safety tech, crash ratings and reliability are core trust signals that influence brand and model choice.",
+      "likely_owned_page_types": [
+        "Safety page",
+        "performance/safety page",
+        "warranty page",
+        "awards/reviews page",
+        "ownership guide"
+      ]
+    },
+    {
+      "brand_topic_category": "Value, offers, finance and total cost of ownership",
+      "category_priority": "P2",
+      "selected_for_audit": true,
+      "why_relevant": "Finance options, incentives and TCO calculations are high commercial-intent topics at point of purchase in Japan.",
+      "likely_owned_page_types": [
+        "Finance page",
+        "offers page",
+        "pricing/specifications page",
+        "TCO calculator",
+        "finance FAQ"
+      ]
+    }
+  ],
+  "unmapped_brand_topic_categories": [],
+  "scope_policy": {
+    "brand_topic_category_count": 5,
+    "queries_per_brand_topic_category": 10,
+    "non_branded_queries_per_category": 5,
+    "branded_queries_per_category": 5,
+    "total_query_count": 50,
+    "canonical_category_field": "brand_topic_category",
+    "journey_stage_allowed": true,
+    "journey_category_deprecated": true
+  }
+}

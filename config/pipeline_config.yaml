@@ -1,0 +1,93 @@
+brand: Nissan
+market: Japan
+domain: https://www.nissan.co.jp
+vertical: automotive
+query_portfolio_id: automotive_japan_nissan_v1
+scope_multiplier: 3
+max_queries: 50
+max_owned_pages_per_query: 3
+max_external_pages_per_query: 3
+min_external_references_per_query: 3
+reuse_existing_outputs: false
+force_refetch_serpapi: true
+force_refetch_owned_pages: true
+force_refetch_external_pages: true
+check_site_standards: true
+force_refetch_site_standards: true
+scraping:
+  mode: local_full_page
+  paid_api_fallback: false
+  renderer: playwright
+  only_main_content: false
+  full_page_markdown: true
+  preserve_header_footer: true
+  preserve_all_links: true
+  preserve_all_images_alt_text: true
+  preserve_tables: true
+  preserve_metadata: true
+  require_geo_analysis_ready: true
+  preserve_failed_extracts: true
+  blocked_status_codes:
+  - 401
+  - 403
+  - 429
+  blocked_pages_score_policy: exclude_from_score
+  playwright_timeout_ms: 60000
+localisation:
+  gl: jp
+  hl: en
+owned_domains:
+- nissan.co.jp
+- www.nissan.co.jp
+- www2.nissan.co.jp
+- www3.nissan.co.jp
+owned_ecosystem_domains:
+- global.nissannews.com
+- www.nissan-global.com
+- nissan-global.com
+off_market_owned_domains:
+- www.nissan.co.uk
+- nissan.co.uk
+- www.nissanusa.com
+- nissanusa.com
+- www.nissan.com.au
+- nissan.com.au
+paths:
+  brand_input: inputs/brand_input.json
+  audit_context_input: inputs/audit_context.json
+  owned_url_inventory_input: inputs/owned_urls/nissan_japan_owned_urls.json
+  query_portfolio_input: inputs/query_portfolios/nissan_japan_query_portfolio.json
+  audit_context_output: outputs/audit_context/audit_context.json
+  site_standards: outputs/site_standards/site_standards.json
+  google_ai_mode_output: outputs/google_ai_mode/google_ai_mode_output.json
+  google_ai_mode_compact: outputs/google_ai_mode/google_ai_mode_compact.json
+  visibility_matrix: outputs/visibility/visibility_matrix.json
+  evidence_scope: outputs/evidence_scope/evidence_scope.json
+  owned_pages_full: outputs/content_intelligence/owned_pages_full.json
+  external_pages_full: outputs/external_pages/external_pages_full.json
+  owned_readiness: outputs/page_scores/owned_page_scores.json
+  external_readiness: outputs/page_scores/external_page_scores.json
+  source_preference_benchmark: outputs/benchmark/source_preference_benchmark.json
+  preference_rules: outputs/rules/preference_rules.json
+  improvement_backlog: outputs/actions/improvement_backlog.json
+  dashboard_dataset: outputs/dashboard/ai_visibility_dashboard_dataset.json
+  bodhi_bundle: outputs/bodhi/bodhi_input_bundle.json
+  brand_topic_categories_input: inputs/brand_topic_categories/nissan_japan_brand_topic_categories.json
+  ai_visibility_scores: outputs/visibility/ai_visibility_scores.json
+  source_classification: outputs/source_landscape/source_classification.json
+  competitor_publisher_landscape: outputs/source_landscape/competitor_publisher_landscape.json
+  winning_source_patterns: outputs/benchmark/winning_source_patterns.json
+  owned_vs_external_gap_analysis: outputs/benchmark/owned_vs_external_gap_analysis.json
+  owned_page_content_recommendations: outputs/recommendations/owned_page_content_recommendations.json
+  pr_opportunity_plan: outputs/pr_publisher_opportunities/pr_opportunity_plan.json
+pdf_parser:
+  enabled: true
+  parse_target_pdf_urls: true
+  parse_linked_pdfs_by_default: false
+  mode: fast_text_first
+  ocr_fallback_enabled: false
+  max_pages: 80
+synthetic_brand_topic_count: 5
+queries_per_brand_topic_category: 10
+non_branded_queries_per_category: 5
+branded_queries_per_category: 5

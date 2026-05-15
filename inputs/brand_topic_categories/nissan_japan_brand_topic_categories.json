@@ -1,0 +1,69 @@
+{
+  "brand_topic_categories": [
+    {
+      "topic_id": "topic_01",
+      "brand_topic_category": "EV range, charging and battery confidence",
+      "description": "Selected because range, charging and battery assurance are high-friction EV purchase questions in Japan.",
+      "priority": "P1",
+      "query_count": 10,
+      "non_branded_query_count": 5,
+      "branded_query_count": 5,
+      "expected_page_types": [],
+      "notes": "Synthetic pilot category; replace with business-approved category if available."
+    },
+    {
+      "topic_id": "topic_02",
+      "brand_topic_category": "Hybrid / e-POWER running costs and powertrain choice",
+      "description": "Selected because powertrain choice and running-cost clarity influence Japan consideration and ownership economics.",
+      "priority": "P2",
+      "query_count": 10,
+      "non_branded_query_count": 5,
+      "branded_query_count": 5,
+      "expected_page_types": [],
+      "notes": "Synthetic pilot category; replace with business-approved category if available."
+    },
+    {
+      "topic_id": "topic_03",
+      "brand_topic_category": "Family practicality, space and comfort",
+      "description": "Selected because family buyers need practical, use-case-led evidence on space, seating and comfort.",
+      "priority": "P1",
+      "query_count": 10,
+      "non_branded_query_count": 5,
+      "branded_query_count": 5,
+      "expected_page_types": [],
+      "notes": "Synthetic pilot category; replace with business-approved category if available."
+    },
+    {
+      "topic_id": "topic_04",
+      "brand_topic_category": "Safety, reliability and trust",
+      "description": "Selected because safety, reliability and warranty proof are key trust signals in AI-led vehicle research.",
+      "priority": "P1",
+      "query_count": 10,
+      "non_branded_query_count": 5,
+      "branded_query_count": 5,
+      "expected_page_types": [],
+      "notes": "Synthetic pilot category; replace with business-approved category if available."
+    },
+    {
+      "topic_id": "topic_05",
+      "brand_topic_category": "Value, offers, finance and total cost of ownership",
+      "description": "Selected because finance, subsidies, resale and TCO questions indicate high commercial intent.",
+      "priority": "P2",
+      "query_count": 10,
+      "non_branded_query_count": 5,
+      "branded_query_count": 5,
+      "expected_page_types": [],
+      "notes": "Synthetic pilot category; replace with business-approved category if available."
+    }
+  ],
+  "scope_policy": {
+    "brand_topic_category_count": 5,
+    "queries_per_brand_topic_category": 10,
+    "non_branded_queries_per_category": 5,
+    "branded_queries_per_category": 5,
+    "total_query_count": 50,
+    "canonical_category_field": "brand_topic_category",
+    "journey_stage_allowed": true,
+    "journey_category_deprecated": true
+  }
+}

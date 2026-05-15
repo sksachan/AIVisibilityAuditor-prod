@@ -1,0 +1,213 @@
+# GEO / AI Source Readiness scoring framework.
+# Applies consistently to owned pages and external pages.
+# Each page receives six dimension scores out of 20, producing geo_score_120.
+# readiness_score remains 0..100 for backwards compatibility and equals round(geo_score_120 / 1.2).
+framework:
+  name: GEO / AI Source Readiness Framework
+  max_score: 120
+  dimension_max: 20
+  citation_likelihood:
+    likely_cited_min: 90
+    occasionally_cited_min: 60
+    rarely_cited_max: 59
+
+dimensions:
+  content_clarity:
+    max: 20
+    description: Answer-first clarity, relevant headings, useful intro, plain factual language, and enough readable content.
+    feature_weights:
+      answer_first: 0.35
+      query_relevance: 0.25
+      neutral_tone: 0.15
+      extractable_passages: 0.15
+      accessibility: 0.10
+  semantic_depth:
+    max: 20
+    description: Topic coverage, substantive depth, validated facts, statistics, comparisons, and buyer decision support.
+    feature_weights:
+      specific_facts: 0.30
+      statistics: 0.20
+      comparison_readiness: 0.25
+      extractable_passages: 0.15
+      query_relevance: 0.10
+  structured_data:
+    max: 20
+    description: JSON-LD/schema availability, FAQPage/Product/Offer/WebPage readiness, and machine-readable page structure.
+    feature_weights:
+      schema: 0.70
+      faq_readiness: 0.15
+      extractable_passages: 0.15
+  eeat_signals:
+    max: 20
+    description: Source-backed claims, authority/trust signals, warranty/safety/finance proof, and neutral factual credibility.
+    feature_weights:
+      source_citations: 0.35
+      authority_signals: 0.35
+      specific_facts: 0.15
+      neutral_tone: 0.15
+  freshness_index:
+    max: 20
+    description: Freshness dates, offer/specification validity, indexability/accessibility and domain-level standards signals where observable.
+    feature_weights:
+      freshness: 0.45
+      accessibility: 0.30
+      schema: 0.10
+      source_citations: 0.15
+  faq_readiness:
+    max: 20
+    description: Conversational Q&A coverage, FAQ extractability, natural-language buyer questions and FAQ schema eligibility.
+    feature_weights:
+      faq_readiness: 0.55
+      answer_first: 0.15
+      query_relevance: 0.15
+      extractable_passages: 0.15
+
+# Legacy feature weights retained for compatibility and debugging.
+feature_weights:
+  answer_first: 1.35
+  query_relevance: 1.45
+  extractable_passages: 1.15
+  specific_facts: 1.25
+  statistics: 1.15
+  source_citations: 1.20
+  comparison_readiness: 1.05
+  faq_readiness: 0.95
+  schema: 1.00
+  freshness: 0.90
+  neutral_tone: 0.90
+  authority_signals: 1.15
+  accessibility: 0.70
+penalties:
+  promotional_language_penalty: 0.90
+  noise_penalty: 0.85
+  keyword_stuffing: 1.10
+thresholds:
+  strong: 80
+  adequate: 65
+  weak: 45
+  meaningful_gap_delta: 10
+  external_win_min_score: 55
+  low_quality_source_score_cap: 58
+  off_market_source_score_cap: 62
+  social_forum_source_score_cap: 60
+heuristics:
+  answer_first_max_chars: 1200
+  min_word_count_basic: 300
+  min_word_count_strong: 900
+  statistics_min_numeric_mentions: 5
+  faq_min_questions: 3
+  max_questions: 8
+  max_headings: 20
+  max_links: 10
+  comparison_terms:
+    - compare
+    - comparison
+    - versus
+    - vs
+    - pros
+    - cons
+    - better
+    - cheaper
+    - difference
+    - compared
+    - while
+    - whereas
+    - trade-off
+    - alternative
+    - 比較
+    - 違い
+    - メリット
+    - デメリット
+  citation_terms:
+    - according to
+    - source
+    - cited
+    - study
+    - report
+    - data
+    - survey
+    - regulator
+    - government
+    - ministry
+    - warranty
+    - jncap
+    - nasva
+    - meti
+    - mlit
+    - 国土交通省
+    - 経済産業省
+    - 調査
+    - 出典
+    - 参照
+  authority_terms:
+    - warranty
+    - safety
+    - rating
+    - award
+    - certified
+    - official
+    - government
+    - regulator
+    - expert
+    - dealer
+    - service
+    - jncap
+    - nasva
+    - meti
+    - mlit
+    - 保証
+    - 安全
+    - 認定
+    - 公式
+  promotional_terms:
+    - best ever
+    - unbeatable
+    - ultimate
+    - perfect
+    - revolutionary
+    - incredible
+    - amazing
+    - world-class
+    - 圧倒的
+    - 究極
+    - 最高
+    - 革新的
+    - 魅力
+
+
+# Extraction manifest signals produced by scripts/local_hybrid_scraper.py.
+# 07_score_pages.py reads these signals alongside markdown so scoring is based on
+# evidence availability, not raw text length alone.
+extraction_manifest_alignment:
+  required_for_confident_scoring:
+    - geo_analysis_ready
+    - extraction_metrics.markdown_chars
+    - content_regions.full_markdown_chars
+    - content_regions.main_chars
+    - content_regions.footer_chars
+    - extraction_metrics.heading_count
+    - extraction_metrics.link_count
+    - extraction_metrics.image_count
+    - extraction_metrics.pdf_link_count
+    - extraction_metrics.numeric_fact_count
+    - geo_signals.answer_first
+    - geo_signals.extractable_passages
+    - geo_signals.low_noise_ratio
+    - geo_signals.domain_specific_terms
+    - geo_signals.comparison_terms
+    - geo_signals.source_citations
+    - geo_signals.pdf_or_spec_links
+    - geo_signals.image_alt_evidence
+    - geo_signals.schema_json_ld
+    - geo_signals.schema_types
+    - metadata.schema_types
+    - geo_signals.canonical
+    - geo_signals.meta_description
+    - geo_signals.robots_indexable
+  blocked_page_policy: exclude_from_content_score
+  blocked_status_codes: [401, 403, 429]
+  note: >-
+    Blocked, failed or partial extraction pages are preserved as evidence but are excluded from
+    content-quality scoring so external medians are not distorted by access
+    failure. Owned blocked pages should be treated as technical accessibility
+    findings.
