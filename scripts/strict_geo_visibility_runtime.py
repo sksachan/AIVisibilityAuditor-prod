@@ -487,8 +487,7 @@ def main():
     brand = os.environ.get("BRAND") or "Nissan"
     market = os.environ.get("MARKET") or "Japan"
     domain = os.environ.get("DOMAIN") or "https://www.nissan.co.jp"
-    max_external_per_query = int(os.environ.get("MAX_EXTERNAL_SOURCES_PER_QUERY") or os.environ.get("MAX_EXTERNAL_PER_QUERY") or 5)
-
+    
     audit = load_json(project / "outputs/audit_context/audit_context.json", {}) or load_json(project / "inputs/audit_context.json", {}) or {}
     evidence = load_json(project / "outputs/evidence_scope/evidence_scope.json", {}) or {}
     google = load_json(project / "outputs/google_ai_mode/google_ai_mode_compact.json", {}) or {}
@@ -504,6 +503,36 @@ def main():
     target_urls = [p.get("url") for p in audit_pages if isinstance(p, dict) and p.get("url")]
     if not target_urls:
         target_urls = [p.get("url") for p in owned_pages if isinstance(p, dict) and p.get("url")]
+
+    def clean_env_value(value, default=None):
+        if value is None:
+            return default
+        value = str(value).strip()
+
+        # Bodhi sometimes injects values as quoted strings, e.g. '"5"' or "'5'".
+        while len(value) >= 2 and (
+            (value[0] == value[-1] == '"') or
+            (value[0] == value[-1] == "'")
+        ):
+            value = value[1:-1].strip()
+
+        return value if value != "" else default
+
+
+    def env_int(*names, default=0):
+        for name in names:
+            raw = os.environ.get(name)
+            cleaned = clean_env_value(raw)
+            if cleaned is not None:
+                return int(cleaned)
+        return int(default)
+
+
+    max_external_per_query = env_int(
+        "MAX_EXTERNAL_SOURCES_PER_QUERY",
+        "MAX_EXTERNAL_PER_QUERY",
+        default=5
+    )
 
     # Normalise query rows by id and query text.
     q_by_text = {to_text(q.get("query") or q.get("query_text") or q.get("prompt")).lower(): q for q in query_rows if isinstance(q, dict)}
