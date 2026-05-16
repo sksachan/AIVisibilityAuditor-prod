@@ -254,88 +254,109 @@ def strict_geo_score(page: dict, related_queries: list[dict]) -> tuple[int, dict
     weak_content = m["substantive_units"] < 350 or (len(text) < 1500 and m["numeric_evidence_count"] < 2)
 
     # 1) Content Clarity: strict answer-first + readable buyer guidance.
+    # No easy marks for long official/product catalogue pages: the page must visibly answer the mapped query early.
     clarity = 0
-    if m["substantive_units"] >= 350:
-        clarity += 4
-    if m["substantive_units"] >= 900:
+    if m["substantive_units"] >= 500:
         clarity += 3
+    if m["substantive_units"] >= 1200:
+        clarity += 2
     if answer_first:
-        clarity += 5
+        clarity += 6
     if overlap >= 3:
         clarity += 3
-    if m["headings"] >= 3:
+    if overlap >= 6:
         clarity += 2
-    if m["answer_hits"] >= 4:
+    if m["headings"] >= 4:
         clarity += 2
+    if m["answer_hits"] >= 6:
+        clarity += 2
+    if not answer_first:
+        clarity = min(clarity, 8)
     clarity = max(0, min(20, clarity - boilerplate_penalty))
 
     # 2) Semantic Depth: stats/comparisons/details matched to query family.
     semantic = 0
     if overlap >= 2:
-        semantic += 4
+        semantic += 3
     if overlap >= 5:
         semantic += 3
-    semantic += min(5, m["numeric_evidence_count"])
+    if overlap >= 8:
+        semantic += 2
+    semantic += min(4, m["numeric_evidence_count"])
     if m["tables"] >= 2:
         semantic += 3
     if any(x in lower for x in ["比較", "comparison", "versus", "vs", "グレード間", "対象", "条件"]):
         semantic += 2
-    if m["proof_hits"] >= 4:
+    if m["proof_hits"] >= 5:
         semantic += 3
+    if m["numeric_evidence_count"] < 2 and m["tables"] < 1:
+        semantic = min(semantic, 9)
     semantic = min(20, semantic)
 
-    # 3) Structured Data: schema must be detected and relevant.
+    # 3) Structured Data: schema must be detected and relevant. Tables do not substitute for schema.
     structured = 0
     if m["has_jsonld"]:
-        structured += 4
+        structured += 3
     if m["has_product_schema"]:
         structured += 4
     if m["has_offer_schema"]:
         structured += 4
     if m["has_faq_schema"]:
-        structured += 6
+        structured += 8
     if m["tables"] >= 2:
-        structured += 2
+        structured += 1
+    if not (m["has_product_schema"] or m["has_offer_schema"] or m["has_faq_schema"]):
+        structured = min(structured, 6)
     structured = min(20, structured)
 
-    # 4) EEAT: official brand is not enough; require proof, terms, dates, sources.
-    eeat = 2 if is_owned_url(page.get("url") or "") else 0
+    # 4) EEAT: official brand is only a small base; require proof, terms, dates, sources.
+    eeat = 1 if is_owned_url(page.get("url") or "") else 0
     if m["proof_hits"] >= 3:
-        eeat += 4
+        eeat += 3
+    if m["proof_hits"] >= 6:
+        eeat += 2
     if any(x in lower for x in ["保証", "warranty", "terms", "条件", "注記", "販売店", "dealer"]):
         eeat += 3
     if any(x in lower for x in ["国土交通省", "jncap", "nasva", "mlit", "meti", "審査値", "試験条件"]):
-        eeat += 4
+        eeat += 5
     if m["links"] >= 8:
-        eeat += 2
+        eeat += 1
     if m["has_dates"]:
         eeat += 2
+    if m["proof_hits"] < 3:
+        eeat = min(eeat, 7)
     eeat = min(20, eeat)
 
-    # 5) Freshness & index: no llms/date = low; offers need expiry/update.
+    # 5) Freshness & index: date/validity proof is required for finance, safety, warranty, subsidy and current-offer content.
     freshness = 0
     if "robots meta: index" in lower or "index,follow" in lower:
-        freshness += 4
-    if m["has_dates"]:
-        freshness += 4
-    if any(x in lower for x in ["2026", "2025", "応募締切", "valid until", "last updated", "更新"]):
-        freshness += 3
-    if "canonical url:" in lower:
         freshness += 2
+    if m["has_dates"]:
+        freshness += 5
+    if any(x in lower for x in ["2026", "2025", "応募締切", "valid until", "last updated", "更新"]):
+        freshness += 4
+    if "canonical url:" in lower:
+        freshness += 1
     if "llms.txt" in lower:
-        freshness += 3
+        freshness += 2
+    if not m["has_dates"]:
+        freshness = min(freshness, 5)
     freshness = min(20, freshness)
 
-    # 6) FAQ readiness: only real Q&A/FAQ markers count. Do not award generic score.
+    # 6) FAQ readiness: only real Q&A/FAQ markers count. Do not award inferred FAQ readiness.
     faq = 0
     if m["question_hits"] >= 2:
-        faq += 5
-    if m["has_faq_schema"]:
-        faq += 8
-    if any(x in lower for x in ["よくある", "faq", "質問", "q&a"]):
         faq += 4
-    if answer_first and m["question_hits"] >= 1:
+    if m["question_hits"] >= 5:
         faq += 2
+    if m["has_faq_schema"]:
+        faq += 10
+    if any(x in lower for x in ["よくある", "faq", "質問", "q&a"]):
+        faq += 3
+    if answer_first and m["question_hits"] >= 1:
+        faq += 1
+    if not m["has_faq_schema"]:
+        faq = min(faq, 8)
     faq = min(20, faq)
 
     dims = {
@@ -355,13 +376,19 @@ def strict_geo_score(page: dict, related_queries: list[dict]) -> tuple[int, dict
     related_query_types = {query_type_of(q, to_text(q.get("query") if isinstance(q, dict) else q)) for q in related_queries if q}
     has_branded_query = "branded" in related_query_types
     has_nonbranded_query = "non_branded" in related_query_types or not has_branded_query
-    trust_weak = dims["eeat_signals"] < 10 or m["proof_hits"] < 3
-    schema_weak = dims["structured_data"] < 8
-    faq_weak = dims["faq_readiness"] < 8
-    freshness_weak = dims["freshness_index"] < 8
-    answer_weak = (not answer_first) or overlap < 2
-    proof_weak = m["numeric_evidence_count"] < 2 and m["proof_hits"] < 3
-    finance_or_legal_intent = any(x in lower for x in ["残価", "おまとめ", "サブスク", "金利", "保証", "補助金", "保険", "車検", "契約", "条件", "warranty", "finance", "lease", "insurance", "subsidy"])
+    related_target_cited = any((q.get("owned_target_page_cited") is True) for q in related_queries if isinstance(q, dict))
+    related_has_competitor = any((q.get("competitor_led") is True or (q.get("competitor_brands_detected") or {})) for q in related_queries if isinstance(q, dict))
+    related_count = len([q for q in related_queries if q])
+    url_path = urlparse(page.get("url") or "").path.lower().rstrip("/")
+    broad_catalogue_page = bool(re.search(r"/vehicles/new/[^/]+(?:\.html)?$", url_path))
+    trust_weak = dims["eeat_signals"] < 12 or m["proof_hits"] < 4
+    schema_weak = dims["structured_data"] < 10
+    faq_weak = dims["faq_readiness"] < 10
+    freshness_weak = dims["freshness_index"] < 10
+    answer_weak = (not answer_first) or overlap < 3
+    proof_weak = m["numeric_evidence_count"] < 3 and m["proof_hits"] < 4
+    citation_weak = not related_target_cited
+    finance_or_legal_intent = any(x in lower for x in ["残価", "おまとめ", "サブスク", "金利", "保証", "補助金", "保険", "車検", "契約", "条件", "warranty", "finance", "lease", "insurance", "subsidy", "安全", "safety", "battery", "バッテリー", "充電", "range", "航続"])
 
     cap_reasons = []
     def apply_cap(value, reason):
@@ -371,29 +398,38 @@ def strict_geo_score(page: dict, related_queries: list[dict]) -> tuple[int, dict
             score = value
 
     if weak_content:
-        apply_cap(30, "weak substantive content / extraction payload too thin")
+        apply_cap(28, "weak substantive content / extraction payload too thin")
     if overlap == 0:
-        apply_cap(42, "no mapped-query term overlap")
+        apply_cap(36, "no mapped-query term overlap")
     if answer_weak:
-        apply_cap(56, "missing answer-first buyer-query coverage")
+        apply_cap(50, "missing answer-first buyer-query coverage")
     if has_branded_query and proof_weak:
-        apply_cap(52, "branded query page lacks sufficient visible evidence/proof in the content")
+        apply_cap(46, "branded query page lacks sufficient visible evidence/proof in the content")
     if has_nonbranded_query and trust_weak:
-        apply_cap(50, "non-branded query requires stronger trust/evidence before AI systems should cite it")
+        apply_cap(44, "non-branded query requires strong trust/evidence before AI systems should cite it")
     if schema_weak:
-        apply_cap(72, "weak structured data / machine readability")
+        apply_cap(62, "weak structured data / machine readability")
     if faq_weak:
-        apply_cap(68, "weak FAQ or Q&A extractability")
+        apply_cap(58, "weak FAQ or Q&A extractability")
     if trust_weak:
-        apply_cap(66, "weak proof / EEAT evidence")
+        apply_cap(56, "weak proof / EEAT evidence")
+    if citation_weak and schema_weak and faq_weak:
+        apply_cap(54, "no owned target-page citation and weak schema/FAQ extractability")
+    if citation_weak and broad_catalogue_page:
+        apply_cap(60, "broad catalogue page is not yet proven as an AI-cited target page")
+    if related_has_competitor and citation_weak:
+        apply_cap(55, "competitor-led mapped queries require stronger owned-page proof before higher readiness")
     if finance_or_legal_intent and freshness_weak:
-        apply_cap(58, "finance/safety/warranty/incentive content lacks strong freshness or validity signals")
+        apply_cap(50, "finance/safety/warranty/EV-incentive content lacks strong freshness or validity signals")
     if answer_weak and schema_weak and faq_weak:
-        apply_cap(52, "combined answer-first, schema and FAQ gaps")
+        apply_cap(44, "combined answer-first, schema and FAQ gaps")
     if answer_weak and trust_weak and has_nonbranded_query:
-        apply_cap(46, "non-branded query has both answer and trust gaps")
+        apply_cap(40, "non-branded query has both answer and trust gaps")
+    if (not m["has_faq_schema"]) and (not m["has_product_schema"]) and citation_weak:
+        apply_cap(52, "no FAQ/Product structured data and no observed target-page citation")
 
-    gaps = [k for k, v in dims.items() if v < 10]
+    # Dimension gaps are strict: 10/20 is not enough for final quality, only for minimum signal.
+    gaps = [k for k, v in dims.items() if v < 12]
     diagnostics = {
         "substantive_units": round(m["substantive_units"], 1),
         "numeric_evidence_count": m["numeric_evidence_count"],
@@ -402,6 +438,10 @@ def strict_geo_score(page: dict, related_queries: list[dict]) -> tuple[int, dict
         "boilerplate_hits": m["boilerplate_hits"],
         "cap_reasons": cap_reasons,
         "related_query_types": sorted(related_query_types),
+        "related_target_cited": bool(related_target_cited),
+        "related_has_competitor": bool(related_has_competitor),
+        "related_count": related_count,
+        "broad_catalogue_page": bool(broad_catalogue_page),
         "answer_weak": bool(answer_weak),
         "trust_weak": bool(trust_weak),
         "schema_weak": bool(schema_weak),
@@ -660,10 +700,16 @@ def main():
             else:
                 u = str(item)
             if u:
+                q_vis = next((m for m in query_matrix if m.get("query_id") == qid or (qtext and m.get("query") == qtext)), {})
                 page_to_queries[u.rstrip("/")].append({
                     "query_id": qid,
                     "query": qtext,
                     "brand_topic_category": q.get("brand_topic_category") or q.get("journey_category"),
+                    "query_type": q_vis.get("query_type") or q.get("query_type"),
+                    "visibility_status": q_vis.get("visibility_status"),
+                    "owned_target_page_cited": q_vis.get("owned_target_page_cited"),
+                    "competitor_led": q_vis.get("competitor_led"),
+                    "competitor_brands_detected": q_vis.get("competitor_brands_detected", {}),
                 })
     # Fallback: use category matching from audit queries.
     queries_by_cat = defaultdict(list)
@@ -749,7 +795,7 @@ def main():
         },
         "summary": "Strict scoring: competitor-led visibility is separated from Nissan owned-domain and owned-target visibility.",
     })
-    write_json(project / "outputs/page_scores/owned_page_scores.json", {"brand": brand, "market": market, "pages": owned_scores, "owned_pages": owned_scores, "scoring_framework": "strict_geo_6x20_v2"})
+    write_json(project / "outputs/page_scores/owned_page_scores.json", {"brand": brand, "market": market, "pages": owned_scores, "owned_pages": owned_scores, "scoring_framework": "strict_geo_6x20_v3_no_easy_marks"})
     write_json(project / "outputs/page_scores/external_page_scores.json", {"brand": brand, "market": market, "pages": external_scores, "external_pages": external_scores})
 
     winning = [{"source_type": st, "citation_count": c, "winning_pattern": "External source is observed in AI citations; use its answer format, proof pattern and extractability as benchmark input for owned-page CMS changes."} for st, c in source_counts.most_common()]
@@ -871,7 +917,7 @@ def main():
         "query_evidence": query_matrix,
         "owned_page_recommendations": recs,
         "pr_opportunities": pr,
-        "methodology": "Strict GEO scoring uses the 6x20 framework and caps pages without answer-first mapped-query coverage, proof, FAQ/schema and freshness. External benchmark signals capture why external sources win in AI answers; they are not full GEO audits of third-party pages. AI visibility is observed-evidence-first and heavily weighted to exact owned target-page citations.",
+        "methodology": "Strict GEO scoring uses the 6x20 framework with no easy marks. Scores are capped when pages lack answer-first mapped-query coverage, visible proof, FAQ/Product structured data, freshness/validity signals, or observed target-page citation evidence. External benchmark signals capture why external sources win in AI answers; they are not full GEO audits of third-party pages. AI visibility is observed-evidence-first and heavily weighted to exact owned target-page citations.",
     }
     write_json(project / "outputs/dashboard/ai_visibility_dashboard_dataset.json", dashboard)
     bundle = {
@@ -881,7 +927,7 @@ def main():
         "recommendations": recs,
         "pr_opportunities": pr,
         "methodology_and_caveats": [
-            "Owned GEO scores are strict and query-specific; official ownership alone is not sufficient.",
+            "Owned GEO scores are strict and query-specific; official ownership, long markdown, or catalogue depth alone is not sufficient.",
             "Branded query pages are penalised when evidence is not visible in page content; non-branded queries require stronger trust/proof to become AI-citable.",
             "External benchmark signals capture citation influence and winning content patterns, not a full GEO quality score for third-party pages.",
             "AI visibility score gives strong credit only for exact owned target-page citations; brand/model mentions are low-credit signals.",
