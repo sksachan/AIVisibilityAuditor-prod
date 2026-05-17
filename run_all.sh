@@ -19,3 +19,5 @@ mkdir -p outputs \
   outputs/control
 
 echo "{\"status\":\"success\",\"project_dir\":\"$PROJECT_DIR\",\"outputs_dir\":\"$PROJECT_DIR/outputs\"}"
+
+python3 scripts/build_query_workbench_bundle.py --project-root . --brand "${BRAND:-Nissan}" --market "${MARKET:-Japan}" --domain "${DOMAIN:-https://www.nissan.co.jp}"

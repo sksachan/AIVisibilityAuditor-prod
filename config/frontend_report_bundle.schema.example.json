@@ -1,0 +1,28 @@
+{
+  "schema_version": "query_workbench.v1",
+  "run_id": "string",
+  "brand": "string",
+  "market": "string",
+  "domain": "string",
+  "query_workbench": [
+    {
+      "query_id": "q001",
+      "query": "string",
+      "mapped_owned_urls": [
+        "top 3"
+      ],
+      "external_top3_benchmark": [
+        "top 3"
+      ],
+      "winning_patterns": [],
+      "cms_recommendations": [],
+      "pr_recommendations": [],
+      "previous_run_delta": null
+    }
+  ],
+  "owned_url_readiness": [],
+  "cms_recommendations": [],
+  "pr_opportunities": [],
+  "action_checklist": [],
+  "run_history": []
+}
