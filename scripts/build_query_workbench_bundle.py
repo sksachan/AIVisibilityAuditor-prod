@@ -405,34 +405,103 @@ def page_blob(page: dict) -> str:
             text(page.get("evidence_markdown") or page.get("markdown") or page.get("content_extract") or page.get("main_text"), 4000)).lower()
 
 
+def _normalise_dimension_scores(raw: dict) -> dict:
+    """Return dimension scores as {dimension: int}.
+
+    Older pipeline files may store dimensions as plain numbers, while the
+    original page scorer stores {dimension: {score, max_score, ...}}. The
+    query-workbench mapper must preserve whichever strict upstream score is
+    available rather than falling back to the loose heuristic.
+    """
+    if not isinstance(raw, dict):
+        return {}
+    out = {}
+    for key, val in raw.items():
+        if isinstance(val, dict):
+            candidate = val.get("score") or val.get("value") or val.get("points")
+        else:
+            candidate = val
+        try:
+            out[str(key)] = max(0, min(20, int(round(float(candidate)))))
+        except Exception:
+            continue
+    return out
+
+
+def _first_numeric(page: dict, keys: list[str]) -> int | None:
+    for key in keys:
+        val = page.get(key)
+        if val is None or val == "":
+            continue
+        try:
+            return max(0, min(120, int(round(float(val)))))
+        except Exception:
+            continue
+    return None
+
+
 def score_owned_page(page: dict, query: str="") -> tuple[int, dict, list[str]]:
     page = record_dict(page)
-    if page.get("score_120") or page.get("geo_readiness_score"):
-        score = int(float(page.get("score_120") or page.get("geo_readiness_score") or 0))
-        dims = page.get("dimensions") if isinstance(page.get("dimensions"), dict) else {}
-        if not dims:
-            dims = page.get("geo_dimensions") if isinstance(page.get("geo_dimensions"), dict) else {}
+
+    # Preserve strict scores produced by strict_geo_visibility_runtime.py or
+    # score_owned_geo_readiness.py. This fixes the previous behaviour where
+    # records carrying geo_score_120/readiness_score were ignored and then
+    # rescored by a loose fallback, often awarding 20/20 for clarity.
+    score = _first_numeric(page, [
+        "score_120",
+        "geo_score_120",
+        "current_geo_score_120",
+        "geo_readiness_score",
+        "readiness_score",
+    ])
+    if score is not None:
+        dims = (
+            _normalise_dimension_scores(page.get("dimensions"))
+            or _normalise_dimension_scores(page.get("dimension_scores"))
+            or _normalise_dimension_scores(page.get("geo_dimensions"))
+            or _normalise_dimension_scores(page.get("feature_scores"))
+        )
         gaps = page.get("dimension_gaps") or page.get("geo_gaps") or []
-        if not isinstance(gaps, list): gaps=[]
+        if not isinstance(gaps, list):
+            gaps = []
+        if dims and not gaps:
+            gaps = [k for k, v in dims.items() if isinstance(v, (int, float)) and v < 12]
         return score, dims, gaps
+
+    # Conservative fallback only for records that genuinely do not carry scored
+    # evidence. It is intentionally stricter than the old heuristic and applies
+    # caps so long official pages cannot look strong without answer-first, proof,
+    # schema/FAQ and freshness signals.
     blob=page_blob(page); low=blob; q=query.lower()
-    q_terms=[w for w in re.findall(r"[a-z0-9]+", q) if len(w)>3]
+    q_terms=[w for w in re.findall(r"[a-z0-9]+", q) if len(w)>3 and w not in {"what","which","japan","nissan"}]
     overlap=len({w for w in q_terms if w in low})
     numeric=len(re.findall(r"\d+[\d,.]*\s?(km|kwh|kw|円|万円|年|%|％|mm|kg|人|席)", low))
-    headings=len(re.findall(r"(^|\n)#{1,4}\s+", text(page.get("markdown") or "")))
-    questions=sum(low.count(x) for x in ["?", "？", "faq", "よくある", "question", "質問"])
-    proof=sum(low.count(x) for x in ["official", "warranty", "safety", "rating", "test", "保証", "安全", "評価", "公式", "仕様", "諸元"])
-    dates=1 if re.search(r"20[2-3][0-9]|更新日|last updated", low) else 0
-    length=min(20, int(len(blob)/900))
+    headings=len(re.findall(r"(^|\n)#{1,4}\s+", text(page.get("markdown") or page.get("content") or "")))
+    questions=sum(low.count(x) for x in ["?", "？", "faq", "よくある", "question", "質問", "q&a"])
+    proof=sum(low.count(x) for x in ["official", "warranty", "safety", "rating", "test", "保証", "安全", "評価", "公式", "仕様", "諸元", "条件", "注記"])
+    dates=1 if re.search(r"20[2-3][0-9]|更新日|last updated|valid until", low) else 0
+    schema_hits=sum(low.count(x) for x in ["schema", "json-ld", "faqpage", "product", "offer"])
+    answer_terms=sum(low.count(x) for x in ["range", "charging", "charge", "cost", "warranty", "safety", "航続", "充電", "価格", "保証", "安全"])
+    answer_first=bool(overlap >= 1 and any(x in low[:1200] for x in ["range", "charging", "charge", "cost", "warranty", "safety", "航続", "充電", "価格", "保証", "安全"]))
+    substantive = max(len(blob) / 650, 0)
     dims={
-        "answer_clarity": min(20, 5+overlap*3 + (4 if len(blob)>500 else 0)),
-        "semantic_depth": min(20, 4+length + min(6, numeric)),
-        "structured_extractability": min(20, 5+headings*3 + min(6, questions)),
-        "evidence_and_proof": min(20, 4+proof*2 + min(8, numeric)),
-        "freshness": min(20, 8+dates*8),
-        "faq_readiness": min(20, 4+questions*3),
+        "content_clarity": min(20, (3 if len(blob)>900 else 0) + (6 if answer_first else 0) + min(5, overlap*2) + min(3, answer_terms)),
+        "semantic_depth": min(20, 3 + min(6, numeric) + min(4, overlap) + (3 if headings >= 3 else 0) + min(4, int(substantive/4))),
+        "structured_data": min(20, min(8, schema_hits*3) + (3 if headings >= 4 else 0) + (2 if questions >= 2 else 0)),
+        "eeat_signals": min(20, 2 + min(8, proof) + min(5, numeric) + (3 if dates else 0)),
+        "freshness_index": min(20, 3 + (8 if dates else 0) + (3 if "canonical" in low else 0)),
+        "faq_readiness": min(20, min(10, questions*2) + (6 if "faqpage" in low else 0)),
     }
     score=sum(dims.values())
+    if not answer_first:
+        score=min(score, 50)
+        dims["content_clarity"] = min(dims["content_clarity"], 8)
+    if proof < 3:
+        score=min(score, 56)
+    if schema_hits == 0:
+        score=min(score, 62)
+    if questions < 2 and "faqpage" not in low:
+        score=min(score, 58)
     gaps=[k for k,v in dims.items() if v<12]
     return score,dims,gaps
 
