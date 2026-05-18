@@ -734,7 +734,9 @@ def aggregate_page_level_cms(qwork: list[dict], max_changes_per_page: int = 3) -
                     'ai_visibility_target':'Increase owned target-page citation and reduce external/competitor-led status across linked queries',
                     'rerun_success_measures':['owned_target_cited=true for linked queries','higher page GEO score','reduced competitor/external-led count']
                 },
-                'validation_required':['Product','Legal/Compliance','SEO/GEO lead']
+                'validation_required':['Product','Legal/Compliance','SEO/GEO lead'],
+            'output_language':'English',
+            'copy_language_policy':'Write all CMS-ready headings, intro copy, body copy, bullets and FAQ items in English. Translate Japanese source evidence into English; keep Japanese terms only as named entities.'
             }
             page_recs.append(rec)
             actions.append({
@@ -1249,6 +1251,7 @@ def assemble_bundle(args, qwork, owned_summary, all_cms, all_pr, action_checklis
         "brand":args.brand,
         "market":args.market,
         "domain":args.domain,
+        "output_language": getattr(args,"output_language","English") or "English",
         "generated_at":time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "locked_orchestration_strategy":"query -> top_3_owned_urls -> top_3_external_citations -> page_level_CMS_changes -> grouped_PR_opportunities -> rerun_delta -> refreshed_recommendations",
         "executive":{
@@ -1289,6 +1292,8 @@ def assemble_bundle(args, qwork, owned_summary, all_cms, all_pr, action_checklis
             "max_owned_pages_per_query":getattr(args,"max_owned",3),
             "max_external_citations_per_query":getattr(args,"max_external",3),
             "query_limit":getattr(args,"query_limit",0),
+            "output_language":getattr(args,"output_language","English") or "English",
+            "copy_language_policy":"All dashboard and CMS-ready copy should be written in English by default; translate/summarise Japanese evidence into English and retain Japanese proper nouns only where useful.",
             "notes":"Bodhi does not call SerpAPI or crawl pages. Refresh execution is owned by Railway evidence service; this builder only consumes stored evidence and assembles the report contract."
         },
         "tracking_plan":{
@@ -1327,6 +1332,7 @@ def main():
     ap.add_argument("--enable-owned-crawl", default="false")
     ap.add_argument("--enable-external-crawl", default="false")
     ap.add_argument("--query-limit", type=int, default=0)
+    ap.add_argument("--output-language", default="English")
     args=ap.parse_args()
     root=Path(args.project_root).resolve()
     raw_input=load_json(Path(args.input_json), {}) if args.input_json else {}
