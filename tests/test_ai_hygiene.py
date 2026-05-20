@@ -168,20 +168,25 @@ class AiDiscoverabilityHygieneTests(unittest.TestCase):
 
             full_pages = []
             for idx in range(40):
-                full_pages.append(
-                    {
-                        "url": f"https://example.com/page-{idx}",
-                        "title": f"Page {idx}",
-                        "geo_score_120": 20 + idx,
-                        "geo_dimensions": {"structured_data": 20},
-                        "technical_signals": {
-                            "json_ld_present": idx == 0,
-                            "json_ld_block_count": 1 if idx == 0 else 0,
-                            "schema_types": ["Product"] if idx == 0 else [],
-                        },
-                        "inventory_source": "sitemap_inventory",
-                    }
-                )
+                page = {
+                    "url": f"https://example.com/page-{idx}",
+                    "title": f"Page {idx}",
+                    "crawl_status": "success",
+                    "word_count": 900,
+                    "markdown": "## Charging support\nOfficial specifications, warranty conditions, safety guidance and 2026 update. Range 300 km. Charging 40 kW.",
+                    "headings": ["Charging support", "Specifications"],
+                    "canonical_url": f"https://example.com/page-{idx}",
+                    "technical_signals": {
+                        "json_ld_present": idx == 0,
+                        "json_ld_block_count": 1 if idx == 0 else 0,
+                        "schema_types": ["Product"] if idx == 0 else [],
+                    },
+                    "inventory_source": "sitemap_inventory",
+                }
+                if idx < 20:
+                    page["geo_score_120"] = 20 + idx
+                    page["geo_dimensions"] = {"structured_data": 20}
+                full_pages.append(page)
             (project / "outputs" / "content_intelligence" / "owned_pages_full.json").write_text(
                 json.dumps({"pages": full_pages}),
                 encoding="utf-8",
@@ -302,7 +307,9 @@ class AiDiscoverabilityHygieneTests(unittest.TestCase):
             self.assertEqual(len(rows), 40)
             self.assertTrue(by_url["https://example.com/page-0"]["query_mapped"])
             self.assertFalse(by_url["https://example.com/page-39"]["query_mapped"])
-            self.assertEqual(by_url["https://example.com/page-39"]["current_geo_score_120"], 59)
+            self.assertEqual(by_url["https://example.com/page-19"]["current_geo_score_120"], 39)
+            self.assertGreater(by_url["https://example.com/page-21"]["current_geo_score_120"], 0)
+            self.assertGreater(by_url["https://example.com/page-21"]["geo_dimensions"]["semantic_depth"], 0)
             self.assertEqual(by_url["https://example.com/page-0"]["json_ld_present"], True)
             self.assertNotIn("https://example.com/not-a-scored-row", by_url)
             self.assertEqual(bundle["executive"]["headline_metrics"]["owned_page_count"], 40)

@@ -401,8 +401,49 @@ def page_score(page: dict) -> Any:
     return first_value(page.get("current_geo_score_120"), page.get("score_120"), page.get("geo_readiness_score"), page.get("geo_score_120"), page.get("readiness_score"))
 
 
+def fallback_geo_from_crawl(page: dict) -> tuple[int, dict[str, int]]:
+    markdown = text(first_value(page.get("markdown"), page.get("text"), page.get("content_extract"), page.get("main_text"), ""), 12000)
+    title = text(first_value(page.get("title"), page.get("page_title"), ""))
+    description = text(first_value(page.get("meta_description"), page.get("description"), ""))
+    combined = f"{title}\n{description}\n{markdown}"
+    low = combined.lower()
+    try:
+        word_count = int(page.get("word_count") or len(combined.split()))
+    except Exception:
+        word_count = len(combined.split())
+    headings = page.get("headings") if isinstance(page.get("headings"), list) else []
+    schema_types = first_value(page.get("schema_types"), page.get("schema_types_detected"), [])
+    schema_count = len(schema_types) if isinstance(schema_types, list) else 0
+    json_ld_present = bool(first_value(page.get("json_ld_present"), page.get("jsonLdPresent"), False))
+    try:
+        json_ld_blocks = int(first_value(page.get("json_ld_block_count"), page.get("jsonLdBlockCount"), 0) or 0)
+    except Exception:
+        json_ld_blocks = 0
+    numeric_count = len(re.findall(r"\d+[\d,.]*\s?(?:km|kwh|kw|円|万円|年|%|％|mm|kg|人|席)", combined, re.I))
+    question_count = low.count("?") + low.count("？") + low.count("faq") + low.count("よくある")
+    proof_count = sum(low.count(term) for term in ["保証", "安全", "仕様", "諸元", "条件", "公式", "warranty", "safety", "specification", "official"])
+    freshness = bool(re.search(r"20[2-3][0-9]|更新日|掲載日|last updated|valid until", combined, re.I))
+    dims = {
+        "content_clarity": min(20, (4 if title else 0) + (4 if description else 0) + (4 if word_count >= 300 else 0) + (4 if len(headings) >= 2 else 0)),
+        "semantic_depth": min(20, (4 if word_count >= 600 else 0) + (4 if word_count >= 1200 else 0) + min(6, numeric_count) + min(4, len(headings))),
+        "structured_data": min(20, (12 if json_ld_present or json_ld_blocks > 0 else 0) + min(8, schema_count * 3)),
+        "eeat_signals": min(20, 2 + min(8, proof_count) + min(6, numeric_count) + (4 if freshness else 0)),
+        "freshness_index": min(20, 4 + (8 if freshness else 0) + (4 if page.get("canonical_url") else 0)),
+        "faq_readiness": min(20, min(12, question_count * 3)),
+    }
+    if text(page.get("crawl_status")).lower() not in {"success", "partial_success_empty_text"} and word_count < 20:
+        dims = {key: 0 for key in dims}
+    return sum(dims.values()), dims
+
+
 def has_scored_owned_signal(page: dict) -> bool:
-    return page_score(page) is not None or page.get("geo_analysis_ready") is True
+    if page_score(page) is not None or page.get("geo_analysis_ready") is True:
+        return True
+    try:
+        word_count = int(page.get("word_count") or 0)
+    except Exception:
+        word_count = 0
+    return text(page.get("crawl_status")).lower() == "success" and (word_count > 0 or bool(page.get("markdown") or page.get("text")))
 
 
 def page_technical_signals(page: dict) -> dict:
@@ -444,9 +485,11 @@ def canonical_owned_readiness_row(page: dict, *, query_mapped: bool = False, rel
         return None
     extract = page.get("owned_page_extract") if isinstance(page.get("owned_page_extract"), dict) else {}
     dims = first_value(page.get("geo_dimensions"), page.get("dimensions"), page.get("dimension_scores"), {})
-    dims = dims if isinstance(dims, dict) else {}
+    dims = _normalise_dimension_scores(dims) if isinstance(dims, dict) else {}
     tech = page_technical_signals(page)
     score = page_score(page)
+    if score in (None, "", 0) and not dims:
+        score, dims = fallback_geo_from_crawl(page)
     row = {
         "url": url,
         "title": text(first_value(extract.get("title"), page.get("title"), page.get("page_title"))),
@@ -607,7 +650,11 @@ def finalise_frontend_contract(bundle: dict, *sources: Any) -> dict:
                 continue
             existing = rows_by_url[key]
             existing["query_mapped"] = bool(existing.get("query_mapped") or canonical.get("query_mapped"))
-            for field in ("title", "current_geo_score_120", "geo_dimensions", "inventory_source", "json_ld_present", "json_ld_block_count", "schema_types"):
+            if not existing.get("current_geo_score_120") and canonical.get("current_geo_score_120"):
+                existing["current_geo_score_120"] = canonical.get("current_geo_score_120")
+            if not existing.get("geo_dimensions") and canonical.get("geo_dimensions"):
+                existing["geo_dimensions"] = canonical.get("geo_dimensions")
+            for field in ("title", "inventory_source", "json_ld_present", "json_ld_block_count", "schema_types"):
                 if existing.get(field) in (None, "", [], {}):
                     existing[field] = canonical.get(field)
             tech = existing.get("technical_signals") if isinstance(existing.get("technical_signals"), dict) else {}
