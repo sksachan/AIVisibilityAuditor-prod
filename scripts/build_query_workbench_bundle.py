@@ -17,7 +17,9 @@ from collections import Counter, defaultdict
 from typing import Any
 from ai_hygiene import attach_ai_discoverability_hygiene
 
-OWNED_HINTS = ["nissan.co.jp", "nissan-global.com", "nissannews.com", "nissan-fs.co.jp", "global.nissannews.com"]
+# OWNED_HINTS is populated at runtime from --owned-domains CLI arg or brand config.
+# No hardcoded brand domains.
+OWNED_HINTS: list[str] = []
 COMPETITORS = {
     "Toyota": ["toyota", "トヨタ", "lexus", "レクサス"],
     "Honda": ["honda", "ホンダ"],
@@ -127,7 +129,7 @@ def is_owned(url: str) -> bool:
 
 def source_type(url: str, raw: str = "") -> str:
     d = domain(url); r = (raw or "").lower()
-    if is_owned(url): return "owned_or_nissan_ecosystem"
+    if is_owned(url): return "owned_brand_ecosystem"
     if any(x in d for x in ["toyota", "honda", "mitsubishi", "mazda", "subaru", "suzuki", "daihatsu", "lexus"]): return "competitor_owned"
     if any(x in d for x in ["reddit", "youtube", "facebook", "instagram", "x.com", "twitter", "tiktok"]): return "forum_social_video"
     if any(x in d for x in ["go.jp", "mlit", "meti", "nasva", "enecho"]): return "authority_body"
@@ -915,7 +917,7 @@ def winning_patterns(query: str, citations: list[dict], pattern_lookup: list[dic
         out.append({
             "source_url": c["url"], "source_domain": c.get("domain") or domain(c["url"]), "source_type": st,
             "pattern_type": "; ".join(dict.fromkeys(patterns)),
-            "owned_content_implication": "Replicate the useful answer structure on mapped owned pages using verified Nissan facts only.",
+            "owned_content_implication": "Replicate the useful answer structure on mapped owned pages using verified brand facts only.",
             "pr_implication": "Create corroborating third-party proof where owned pages cannot credibly self-validate the claim.",
             "evidence_basis": sn or f"{c.get('domain') or domain(c['url'])} appeared as a top external citation for this query.",
         })
@@ -1107,7 +1109,7 @@ def aggregate_page_level_cms(qwork: list[dict], max_changes_per_page: int = 3) -
                 'content_requirements':[
                     'Aggregate overlapping query needs into one reusable page module rather than one module per query.',
                     'Open with a direct, quotable answer and then add proof, caveats and decision criteria.',
-                    'Use verified Nissan facts only; do not copy or fabricate external-source claims.',
+                    'Use verified brand facts only; do not copy or fabricate external-source claims.',
                     'Prefer statistics, citations, quotations, tables or FAQs where the evidence supports them.',
                     'Track post-update movement in both page GEO score and query AI visibility score.'
                 ],
@@ -1158,7 +1160,7 @@ def aggregate_pr_opportunities(qwork: list[dict], max_items: int = 20) -> tuple[
         for comp in vis.get('competitors') or []: pass
         for c in q.get('external_top3_benchmark') or []:
             st=c.get('source_type') or 'other'
-            if st in {'owned_or_nissan_ecosystem'}: continue
+            if st in {'owned_brand_ecosystem'}: continue
             grp=groups[st]; grp['source_type']=st; grp['journeys'][journey]+=1
             grp['domains'][c.get('domain') or domain(c.get('url'))]+=1
             query_value=1
@@ -1561,7 +1563,7 @@ def build_from_preview(preview: dict, args) -> dict:
         try: score=int(float(score))
         except Exception: score=visibility_score(status,owned_target,owned_domain,competitors,len(top3))
         item={
-            "query_id":qid,"query":q,"query_type":row.get("query_type") or ("branded" if "nissan" in q.lower() or "日産" in q else "non_branded"),"journey_category":cat,
+            "query_id":qid,"query":q,"query_type":row.get("query_type") or ("branded" if args.brand and args.brand.lower() in q.lower() else "non_branded"),"journey_category":cat,
             **tax,
             "current_ai_visibility":{"score":score,"status":status,"owned_target_cited":owned_target,"owned_domain_cited":owned_domain,"competitors":competitors,"competitor_citation_count":int(row.get("competitor_citation_count") or len(competitors)),"top_citations":citations[:8]},
             "mapped_owned_urls":mapped,"external_top3_benchmark":top3,"winning_patterns":pats,"cms_recommendations":cms,"pr_recommendations":pr,"action_items":[],"previous_run_delta":None,"loop_state":"baseline_ready" if not owned_target else "monitor_and_refresh",
@@ -1697,9 +1699,10 @@ def main():
     ap=argparse.ArgumentParser()
     ap.add_argument("--project-root", default=".")
     ap.add_argument("--input-json", default="")
-    ap.add_argument("--brand", default="Nissan")
-    ap.add_argument("--market", default="Japan")
-    ap.add_argument("--domain", default="https://www.nissan.co.jp")
+    ap.add_argument("--brand", default="", help="Brand name (required)")
+    ap.add_argument("--market", default="", help="Market name (required)")
+    ap.add_argument("--domain", default="", help="Primary owned domain (required)")
+    ap.add_argument("--owned-domains", default="", help="Comma-separated owned domains for brand classification")
     ap.add_argument("--run-id", default="")
     ap.add_argument("--max-owned", type=int, default=3)
     ap.add_argument("--max-external", type=int, default=3)
@@ -1717,6 +1720,15 @@ def main():
     ap.add_argument("--output-language", default="English")
     args=ap.parse_args()
     root=Path(args.project_root).resolve()
+    # Populate OWNED_HINTS from --owned-domains CLI arg for multi-brand support.
+    global OWNED_HINTS
+    if args.owned_domains:
+        OWNED_HINTS = [d.strip().lower() for d in args.owned_domains.split(',') if d.strip()]
+    elif args.domain:
+        # Auto-derive from primary domain if no explicit owned domains provided.
+        from urllib.parse import urlparse as _urlparse
+        _host = _urlparse(args.domain).netloc.lower() or args.domain.replace('https://','').replace('http://','').split('/')[0].lower()
+        OWNED_HINTS = [_host, _host.removeprefix('www.'), f'www.{_host.removeprefix("www.")}']
     raw_input=load_json(Path(args.input_json), {}) if args.input_json else {}
     query_portfolio_file = load_json(Path(args.query_portfolio), {}) if args.query_portfolio else load_json(root/'outputs/query_portfolio/query_portfolio.json', {})
     sitemap_inventory_file = load_json(Path(args.sitemap_inventory), {}) if args.sitemap_inventory else load_json(root/'outputs/sitemap/sitemap_inventory.json', {})
@@ -1798,7 +1810,7 @@ def main():
                 sc=score_by_q.get(qid,{})
                 try: ai_score=int(float(sc.get("ai_visibility_score")))
                 except Exception: ai_score=visibility_score(status,owned_target,owned_domain,competitors,len(top3))
-                item={"query_id":qid,"query":q,"query_type":row.get("query_type") or ("branded" if "nissan" in q.lower() or "日産" in q else "non_branded"),"journey_category":cat,**tax,"current_ai_visibility":{"score":ai_score,"status":status,"owned_target_cited":owned_target,"owned_domain_cited":owned_domain,"competitors":competitors,"competitor_citation_count":len(competitors),"top_citations":citations[:8]},"mapped_owned_urls":mapped,"external_top3_benchmark":top3,"winning_patterns":pats,"cms_recommendations":cms,"pr_recommendations":pr,"action_items":[],"previous_run_delta":None,"loop_state":"baseline_ready" if not owned_target else "monitor_and_refresh"}
+                item={"query_id":qid,"query":q,"query_type":row.get("query_type") or ("branded" if args.brand and args.brand.lower() in q.lower() else "non_branded"),"journey_category":cat,**tax,"current_ai_visibility":{"score":ai_score,"status":status,"owned_target_cited":owned_target,"owned_domain_cited":owned_domain,"competitors":competitors,"competitor_citation_count":len(competitors),"top_citations":citations[:8]},"mapped_owned_urls":mapped,"external_top3_benchmark":top3,"winning_patterns":pats,"cms_recommendations":cms,"pr_recommendations":pr,"action_items":[],"previous_run_delta":None,"loop_state":"baseline_ready" if not owned_target else "monitor_and_refresh"}
                 item["action_items"]=[{"action":c["title"],"owner":c["owner"],"priority":c["priority"],"effort":"M","status":"Not started","target":c["target_url"],"workstream":"CMS remediation","source_query_id":qid} for c in cms[:3]] + [{"action":p["title"],"owner":p["owner"],"priority":p["priority"],"effort":"M","status":"Not started","target":", ".join(p.get("target_domains_observed") or []),"workstream":"PR / external proof","source_query_id":qid} for p in pr[:1]]
                 for a in item["action_items"]: actions_by_key.setdefault((a["workstream"],a.get("target"),a["action"]), {**a,"linked_query_ids":[]})["linked_query_ids"].append(qid)
                 qwork.append(item)

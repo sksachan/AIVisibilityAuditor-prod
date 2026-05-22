@@ -26,8 +26,10 @@ COMPETITOR_BRANDS = {
     "suzuki": ["suzuki", "スズキ"],
     "daihatsu": ["daihatsu", "ダイハツ"],
 }
-NISSAN_TERMS = ["nissan", "日産", "ariya", "アリア", "leaf", "リーフ", "sakura", "サクラ", "serena", "セレナ", "x-trail", "xtrail", "エクストレイル", "note", "ノート", "e-power", "epower", "elgrand", "エルグランド", "roox", "ルークス", "clipper", "クリッパー"]
-OWNED_DOMAIN_FRAGMENTS = ["nissan.co.jp", "nissan-global.com", "global.nissannews.com", "nissannews.com", "nissan-fs.co.jp"]
+# Brand terms and owned domain fragments are populated at runtime from env vars
+# or CLI args. No hardcoded brand-specific terms.
+BRAND_TERMS: list[str] = []
+OWNED_DOMAIN_FRAGMENTS: list[str] = []
 BOILERPLATE_TERMS = ["クルマを探す", "オーナーの方へ", "日産を知る", "mynissan", "サイトマップ", "プライバシーポリシー", "ご利用にあたって", "リコール情報", "faq/お問い合わせ", "セルフ見積り", "カタログ請求", "来店予約"]
 QUESTION_MARKERS = ["?", "？", "faq", "よくある", "質問", "q:", "q.", "問", "answer", "回答"]
 ANSWER_TERMS = ["range", "charging", "charge", "cost", "price", "warranty", "battery", "safety", "family", "seat", "isofix", "boot", "fuel", "hybrid", "lease", "finance", "航続", "充電", "価格", "費用", "保証", "バッテリー", "安全", "家族", "シート", "燃費", "ハイブリッド", "リース", "支払い", "補助金"]
@@ -107,9 +109,8 @@ def classify_source(url: str, raw: str = "") -> str:
     raw_l = (raw or "").lower()
     d = domain_of(url)
     if is_owned_url(url):
-        return "owned_or_nissan_ecosystem"
-    if any(x in d for x in ["toyota", "honda", "mitsubishi", "mazda", "subaru", "suzuki", "daihatsu", "lexus"]):
-        return "competitor_owned"
+        return "owned_brand_ecosystem"
+    # Competitor detection is now data-driven; no hardcoded brand list.
     if any(x in d for x in ["reddit", "facebook", "youtube", "instagram", "tiktok", "x.com", "twitter"]):
         return "forum_social_video"
     if any(x in d for x in ["nasva", "mlit", "meti", "go.jp", "enecho"]):
@@ -142,9 +143,9 @@ def competitor_mentions(text: str) -> dict:
     return dict(out)
 
 
-def nissan_mention(text: str) -> bool:
+def brand_mention(text: str) -> bool:
     t = (text or "").lower()
-    return any(term.lower() in t for term in NISSAN_TERMS)
+    return any(term.lower() in t for term in BRAND_TERMS)
 
 
 def query_type_of(qrow: dict, query: str) -> str:
@@ -152,7 +153,7 @@ def query_type_of(qrow: dict, query: str) -> str:
     if qt in {"branded", "non_branded", "non-branded"}:
         return "non_branded" if qt == "non-branded" else qt
     q = (query or "").lower()
-    return "branded" if nissan_mention(q) else "non_branded"
+    return "branded" if brand_mention(q) else "non_branded"
 
 
 def find_refs(row: dict) -> list:
@@ -218,7 +219,8 @@ def text_metrics(text: str) -> dict:
 
 def query_terms(query: str) -> list:
     q = (query or "").lower()
-    terms = [w for w in re.findall(r"[a-z0-9][a-z0-9\-]{2,}", q) if w not in {"the", "and", "for", "with", "what", "how", "does", "are", "which", "japan", "japanese", "nissan"}]
+    brand_stop = {b.lower() for b in BRAND_TERMS} if BRAND_TERMS else set()
+    terms = [w for w in re.findall(r"[a-z0-9][a-z0-9\-]{2,}", q) if w not in {"the", "and", "for", "with", "what", "how", "does", "are", "which"} | brand_stop]
     # Add Japanese category terms through English journey proxies.
     proxies = []
     if any(w in q for w in ["charge", "charging", "range", "battery", "ev"]):
@@ -500,7 +502,7 @@ def strict_ai_visibility(row: dict, idx: int, target_urls: list[str]) -> tuple[i
         if st in {"publisher_review", "authority_body", "partner_infrastructure", "aggregator_marketplace", "forum_social_video", "other"}:
             publisher_citations.append(c)
 
-    brand_mentioned = nissan_mention(answer_text) or any(nissan_mention(to_text(c)) for c in citations)
+    brand_mentioned = brand_mention(answer_text) or any(brand_mention(to_text(c)) for c in citations)
     top_target_pos = min([c["citation_position"] for c in owned_target_citations], default=None)
     top_owned_pos = min([c["citation_position"] for c in owned_domain_citations], default=None)
     top_comp_pos = min([c["citation_position"] for c in competitor_citations], default=None)
@@ -590,9 +592,23 @@ def env_int(*names, default=0):
 
 def main():
     project = Path(clean_env_value(os.environ.get("PROJECT_DIR"), ".")).resolve()
-    brand = clean_env_value(os.environ.get("BRAND"), "Nissan")
-    market = clean_env_value(os.environ.get("MARKET"), "Japan")
-    domain = clean_env_value(os.environ.get("DOMAIN"), "https://www.nissan.co.jp")
+    brand = clean_env_value(os.environ.get("BRAND"), "")
+    market = clean_env_value(os.environ.get("MARKET"), "")
+    domain = clean_env_value(os.environ.get("DOMAIN"), "")
+    # Populate BRAND_TERMS and OWNED_DOMAIN_FRAGMENTS from env vars for multi-brand support.
+    global BRAND_TERMS, OWNED_DOMAIN_FRAGMENTS
+    brand_terms_env = os.environ.get("BRAND_TERMS", "")
+    if brand_terms_env:
+        BRAND_TERMS = [t.strip() for t in brand_terms_env.split(",") if t.strip()]
+    elif brand:
+        BRAND_TERMS = [brand.lower()]
+    owned_domains_env = os.environ.get("OWNED_DOMAINS", "")
+    if owned_domains_env:
+        OWNED_DOMAIN_FRAGMENTS = [d.strip().lower() for d in owned_domains_env.split(",") if d.strip()]
+    elif domain:
+        from urllib.parse import urlparse as _urlparse
+        _host = _urlparse(domain).netloc.lower() or domain.replace("https://","").replace("http://","").split("/")[0].lower()
+        OWNED_DOMAIN_FRAGMENTS = [_host, _host.removeprefix("www.")]
     max_external_per_query = env_int("MAX_EXTERNAL_SOURCES_PER_QUERY", "MAX_EXTERNAL_PER_QUERY", default=5)
 
     audit = load_json(project / "outputs/audit_context/audit_context.json", {}) or load_json(project / "inputs/audit_context.json", {}) or {}
@@ -618,7 +634,7 @@ def main():
     source_rows = []
     source_counts = Counter()
     competitor_query_rows = []
-    nissan_led = competitor_led = external_led = brand_only = owned_domain_only = owned_target = 0
+    brand_led = competitor_led = external_led = brand_only = owned_domain_only = owned_target = 0
 
     for idx, row in enumerate(google_rows):
         if not isinstance(row, dict):
@@ -654,7 +670,7 @@ def main():
         else:
             external_led += 1
         if details["owned_target_page_cited"] or details["owned_domain_citations"]:
-            nissan_led += 1
+            brand_led += 1
         if details["competitor_citation_count"] or details["competitor_mentions_count"]:
             competitor_query_rows.append(details)
         for c in details["citations"]:
@@ -752,7 +768,7 @@ def main():
         text = " ".join([to_text(p.get("title")), to_text(p.get("description")), to_text(p.get("snippet")), to_text(p.get("markdown"), 5000)])
         tm = text_metrics(text)
         # Keep external benchmark strict too: social is evidence, but lower authority.
-        authority = {"authority_body": 18, "publisher_review": 15, "partner_infrastructure": 13, "competitor_owned": 10, "aggregator_marketplace": 10, "finance_or_insurance": 9, "owned_or_nissan_ecosystem": 12, "forum_social_video": 5, "other": 6}.get(st, 5)
+        authority = {"authority_body": 18, "publisher_review": 15, "partner_infrastructure": 13, "competitor_owned": 10, "aggregator_marketplace": 10, "finance_or_insurance": 9, "owned_brand_ecosystem": 12, "forum_social_video": 5, "other": 6}.get(st, 5)
         packaging = min(20, 4 + (5 if tm["answer_hits"] >= 2 else 0) + min(5, tm["numeric_evidence_count"]) + (4 if tm["tables"] else 0))
         proof = min(20, authority + min(5, tm["proof_hits"]))
         query_match = min(20, 4 + min(8, tm["answer_hits"]) + min(8, tm["numeric_evidence_count"]))
@@ -793,7 +809,7 @@ def main():
             "queries_with_competitor_presence": len(competitor_query_rows),
             "competitor_brands": dict(sum((Counter(r.get("competitor_brands_detected", {})) for r in competitor_query_rows), Counter())),
         },
-        "summary": "Strict scoring: competitor-led visibility is separated from Nissan owned-domain and owned-target visibility.",
+        "summary": "Strict scoring: competitor-led visibility is separated from brand owned-domain and owned-target visibility.",
     })
     write_json(project / "outputs/page_scores/owned_page_scores.json", {"brand": brand, "market": market, "pages": owned_scores, "owned_pages": owned_scores, "scoring_framework": "strict_geo_6x20_v3_no_easy_marks"})
     write_json(project / "outputs/page_scores/external_page_scores.json", {"brand": brand, "market": market, "pages": external_scores, "external_pages": external_scores})
@@ -832,8 +848,8 @@ def main():
             "gap_severity": "material" if gap >= 15 else ("moderate" if gap >= 7 else "low"),
             "gap_reasons": [
                 "Owned target page is not cited in AI answer" if not m.get("owned_target_page_cited") else "Owned target page cited but extractability can improve",
-                "Non-branded queries receive little or no owned-credit unless Nissan target pages are cited",
-                "Competitor and third-party sources are separated from Nissan-owned visibility",
+                "Non-branded queries receive little or no owned-credit unless brand target pages are cited",
+                "Competitor and third-party sources are separated from brand-owned visibility",
             ],
         })
     write_json(project / "outputs/benchmark/source_preference_benchmark.json", {"brand": brand, "market": market, "queries": bench, "rows": bench, "average_owned_geo_score": avg_owned, "average_external_benchmark_score": avg_external, "average_external_citation_influence_score": avg_external_influence, "metric_note": "External benchmark is not a GEO score for third-party pages. It captures observed citation influence and winning content patterns to inform owned-page CMS remediation."})
@@ -878,7 +894,7 @@ def main():
             "recommended_pr_action": "Create validated, third-party-referenceable proof assets and publisher explainers; do not rely on community seeding as a primary tactic.",
             "target_source_types": [st],
             "priority": "P1" if count >= 5 else "P2",
-            "why_it_matters": "External authority and publisher sources are shaping AI answers; Nissan-owned target pages need corroborating citations and cleaner extractable answers.",
+            "why_it_matters": "External authority and publisher sources are shaping AI answers; brand-owned target pages need corroborating citations and cleaner extractable answers.",
         })
     write_json(project / "outputs/pr_publisher_opportunities/pr_opportunity_plan.json", {"brand": brand, "market": market, "opportunities": pr})
 
@@ -899,19 +915,19 @@ def main():
         "competitor_led_query_count": competitor_led,
         "queries_with_competitor_presence": len(competitor_query_rows),
         "external_led_query_count": external_led,
-        "nissan_vs_aggregate_competitor": {
-            "nissan_target_cited_queries": owned_target,
-            "nissan_domain_only_queries": owned_domain_only,
-            "nissan_brand_model_mention_only_queries": brand_only,
+        "brand_vs_aggregate_competitor": {
+            "brand_target_cited_queries": owned_target,
+            "brand_domain_only_queries": owned_domain_only,
+            "brand_mention_only_queries": brand_only,
             "aggregate_competitor_led_queries": competitor_led,
-            "external_led_no_nissan_target_queries": external_led,
+            "external_led_no_brand_target_queries": external_led,
         },
     }
     dashboard = {
         "brand": brand,
         "market": market,
         "executive_kpis": kpis,
-        "source_landscape": {"source_type_counts": dict(source_counts), "competitor_presence": kpis["nissan_vs_aggregate_competitor"]},
+        "source_landscape": {"source_type_counts": dict(source_counts), "competitor_presence": kpis["brand_vs_aggregate_competitor"]},
         "owned_readiness": owned_scores,
         "external_benchmark_patterns": winning,
         "query_evidence": query_matrix,

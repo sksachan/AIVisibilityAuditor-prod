@@ -73,9 +73,21 @@ def extract_queries(cfg: Dict[str, Any]) -> List[Dict[str, Any]]:
     queries = audit.get("queries", []) if isinstance(audit, dict) else []
 
     if not queries:
-        qpath = resolve_path("inputs/query_portfolios/nissan_japan_query_portfolio.json")
-        data = read_json(qpath)
-        queries = data.get("query_portfolio") or data.get("queries") or []
+        # Try brand-specific portfolio first, then generic fallback
+        brand_key = cfg.get('brand', '').lower().replace(' ', '_')
+        market_key = cfg.get('market', '').lower().replace(' ', '_')
+        portfolio_candidates = [
+            f"inputs/query_portfolios/{brand_key}_{market_key}_query_portfolio.json",
+            "inputs/query_portfolios/query_portfolio.json",
+            "inputs/audit_context.json",
+        ]
+        for qp in portfolio_candidates:
+            qpath = resolve_path(qp)
+            if qpath.exists():
+                data = read_json(qpath)
+                queries = data.get("query_portfolio") or data.get("queries") or []
+                if queries:
+                    break
 
     cleaned = []
     for i, q in enumerate(queries[:max_queries], 1):
@@ -424,7 +436,7 @@ def reference_influence(blocks: List[Dict[str, Any]], refs: List[Dict[str, Any]]
     )
 
 
-def detect_mentions(text: str, refs: List[Dict[str, Any]], brand: str = "Nissan") -> Dict[str, Any]:
+def detect_mentions(text: str, refs: List[Dict[str, Any]], brand: str = "") -> Dict[str, Any]:
     combined = f"{text} " + " ".join(
         f"{r.get('title','')} {r.get('source','')} {r.get('domain','')} {r.get('snippet','')}"
         for r in refs
@@ -521,7 +533,7 @@ def build_compact_row(raw: Dict[str, Any], q: Dict[str, Any], cfg: Dict[str, Any
     )
     markdown = compact_whitespace(markdown)
 
-    brand = cfg.get("brand", "Nissan")
+    brand = cfg.get("brand", "")
     mentions = detect_mentions(markdown, refs, brand=brand)
 
     return {
@@ -565,7 +577,7 @@ def build_compact_row(raw: Dict[str, Any], q: Dict[str, Any], cfg: Dict[str, Any
 
 def consolidated_output(rows: List[Dict[str, Any]], cfg: Dict[str, Any], failed: List[Dict[str, Any]]) -> Dict[str, Any]:
     owned_domains = cfg.get("owned_domains", [])
-    brand = cfg.get("brand", "Nissan")
+    brand = cfg.get("brand", "")
 
     per_query = []
 
@@ -693,7 +705,7 @@ def main() -> None:
 
     queries = extract_queries(cfg)
     if not queries:
-        raise RuntimeError("No queries found. Expected inputs/query_portfolios/nissan_japan_query_portfolio.json or inputs/audit_context.json")
+        raise RuntimeError("No queries found. Expected a query portfolio file in inputs/query_portfolios/ or inputs/audit_context.json")
 
     rows = []
     failed = []

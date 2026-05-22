@@ -52,7 +52,7 @@ def _heading(module: str, query: str, journey: str) -> str:
 
 
 def _brief(module: str, query: str, journey: str, patterns: List[str]) -> str:
-    base = f'Generate Japan-market content that directly supports the query: "{query}". Keep claims factual, cite official Nissan or authoritative sources, and avoid unsupported comparative or savings claims.'
+    base = f'Generate market-appropriate content that directly supports the query: "{query}". Keep claims factual, cite official brand or authoritative sources, and avoid unsupported comparative or savings claims.'
     if module == 'answer_first_summary':
         return base + ' Produce an 80-120 word answer-first section suitable for placement below the hero and above product-led content.'
     if module == 'faq_block':
@@ -72,7 +72,7 @@ def _brief(module: str, query: str, journey: str, patterns: List[str]) -> str:
 
 def _html_stub(module: str, heading: str) -> str:
     if module == 'comparison_table':
-        return f'<section class="geo-comparison" data-geo-module="comparison_table"><h2>{heading}</h2><table><thead><tr><th>Decision factor</th><th>Nissan-owned answer</th><th>What the customer should check</th></tr></thead><tbody><tr><td>To be completed</td><td>Use validated Nissan facts only</td><td>Link to official source</td></tr></tbody></table></section>'
+        return f'<section class="geo-comparison" data-geo-module="comparison_table"><h2>{heading}</h2><table><thead><tr><th>Decision factor</th><th>Brand-owned answer</th><th>What the customer should check</th></tr></thead><tbody><tr><td>To be completed</td><td>Use validated brand facts only</td><td>Link to official source</td></tr></tbody></table></section>'
     if module == 'faq_block':
         return f'<section class="geo-faq" data-geo-module="faq_block"><h2>{heading}</h2><div class="faq-item"><h3>Question to be generated</h3><p>Answer to be generated from validated evidence.</p></div></section>'
     if module == 'proof_panel':
@@ -146,9 +146,9 @@ def main() -> None:
                     'proposed_html': _html_stub(m, heading),
                     'brief_for_bodhi': _brief(m, query, q.get('brand_topic_category', ''), patterns),
                     'content_requirements': [
-                        'Use Japan-market facts and caveats.',
+                        'Use market-specific facts and caveats.',
                         'Do not invent numeric claims, savings, rankings or citations.',
-                        'Link to official Nissan source pages or validated external authority where required.',
+                        'Link to official brand source pages or validated external authority where required.',
                         'Keep copy neutral and answer-led rather than purely promotional.'
                     ],
                     'schema_recommendation': {'type': MODULES[m]['schema'], 'required': bool(MODULES[m]['schema'])},

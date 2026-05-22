@@ -37,8 +37,8 @@ def _normalise_type(meta_type: str, url: str, cfg: Dict[str, Any], mapped_pages:
         return 'owned_same_domain'
     mapping = {
         'owned_brand': 'owned_same_domain',
-        'owned_ecosystem': 'nissan_ecosystem_off_market',
-        'off_market_owned': 'nissan_ecosystem_off_market',
+        'owned_ecosystem': 'brand_ecosystem_off_market',
+        'off_market_owned': 'brand_ecosystem_off_market',
         'competitor_owned': 'competitor_owned',
         'publisher_review': 'publisher_review',
         'news_media': 'publisher_review',
@@ -58,7 +58,7 @@ def _source_flags(source_type: str) -> Dict[str, bool]:
     return {
         'is_owned_target_page': source_type == 'owned_target_page',
         'is_owned_domain': source_type in {'owned_target_page', 'owned_same_domain'},
-        'is_nissan_ecosystem': source_type == 'nissan_ecosystem_off_market',
+        'is_brand_ecosystem': source_type == 'brand_ecosystem_off_market',
         'is_competitor': source_type == 'competitor_owned',
         'is_publisher': source_type == 'publisher_review',
         'is_aggregator': source_type == 'aggregator_marketplace',
@@ -109,7 +109,7 @@ def main() -> None:
                 'source_entity': entity,
                 'source_category': stype,
                 'source_role': 'winning_citation',
-                'market_relevance': 'japan_or_unknown' if stype not in {'nissan_ecosystem_off_market'} else 'off_market_or_global',
+                'market_relevance': 'target_market_or_unknown' if stype not in {'brand_ecosystem_off_market'} else 'off_market_or_global',
                 'authority_level': base_meta.get('source_quality', 'low'),
                 'commercial_bias': 'unknown',
                 'snippet': src.get('snippet', ''),
@@ -154,7 +154,7 @@ def main() -> None:
         'aggregator_marketplace_citations': type_counts.get('aggregator_marketplace', 0),
         'authority_body_citations': type_counts.get('authority_body', 0),
         'forum_social_video_citations': type_counts.get('forum_social_video', 0),
-        'off_market_nissan_ecosystem_citations': type_counts.get('nissan_ecosystem_off_market', 0),
+        'off_market_brand_ecosystem_citations': type_counts.get('brand_ecosystem_off_market', 0),
         'low_quality_unknown_citations': type_counts.get('low_quality_unknown', 0),
         'source_type_mix': dict(type_counts),
         'top_domains_by_citation_count': domain_counts.most_common(25),

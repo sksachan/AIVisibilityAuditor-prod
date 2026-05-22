@@ -22,7 +22,7 @@ def _opportunity_type(source_mix: Counter) -> str:
 
 def _summary(journey: str, opp_type: str, top_types: list[str]) -> str:
     if opp_type == 'authority_source':
-        return f'Partner with credible Japan-relevant authorities or infrastructure sources to publish validated explainers and datasets for {journey}.'
+        return f'Partner with credible market-relevant authorities or infrastructure sources to publish validated explainers and datasets for {journey}.'
     if opp_type == 'comparison_narrative':
         return f'Develop neutral, data-backed comparison narratives with respected automotive or consumer publishers for {journey}.'
     if opp_type == 'community_trust':
@@ -30,7 +30,7 @@ def _summary(journey: str, opp_type: str, top_types: list[str]) -> str:
     if opp_type == 'competitive_counter_positioning':
         return f'Create third-party supported proof and comparison content to reduce competitor-led answer construction for {journey}.'
     if opp_type == 'structured_comparison_distribution':
-        return f'Work with comparison and marketplace-style partners to distribute structured, validated Nissan facts for {journey}.'
+        return f'Work with comparison and marketplace-style partners to distribute structured, validated brand facts for {journey}.'
     return f'Build publisher education assets and source packs for {journey}.'
 
 

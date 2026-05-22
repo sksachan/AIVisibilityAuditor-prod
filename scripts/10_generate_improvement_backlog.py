@@ -21,7 +21,7 @@ RULE_META = {
 ACTION_COPY = {
     'journey_coverage_fix': 'Map or create a more specific owned page for this journey intent before optimising the content.',
     'answer_first_module': 'Add an answer-first module that directly answers the buyer question in the first screen of content.',
-    'key_facts_module': 'Add a validated key-facts module with Japan-market figures, assumptions and source labels.',
+    'key_facts_module': 'Add a validated key-facts module with market-specific figures, assumptions and source labels.',
     'comparison_table': 'Add a comparison table or trade-off module aligned to the buyer decision.',
     'faq_block': 'Add concise FAQ blocks matching conversational AI-search questions.',
     'schema_fix': 'Add structured data only where the visible page content supports it.',
@@ -127,7 +127,7 @@ def main() -> None:
             if action_type in {'key_facts_module','proof_panel','comparison_table'}:
                 item['depends_on'].add('Validate exact facts and source references before publishing')
             if action_type == 'journey_coverage_fix':
-                item['depends_on'].add('Confirm whether a better existing Japan-market owned page exists before creating new content')
+                item['depends_on'].add('Confirm whether a better existing owned page exists for this market before creating new content')
             if row.get('external_source',{}).get('source_quality') == 'low':
                 item['depends_on'].add('Do not rely on low-quality external source as proof; validate with official or authority source')
     backlog = []

@@ -18,9 +18,12 @@ def _candidate_bases(domain: str) -> list[str]:
         bases.append(f'{scheme}://www.{host}/')
     if host.startswith('www.'):
         bases.append(f'{scheme}://{host[4:]}/')
-    # Nissan Japan often serves content on www2/www3, but robots and llms should be checked at main domain as well.
-    if host in {'nissan.co.jp', 'www.nissan.co.jp'}:
-        bases.extend(['https://www2.nissan.co.jp/', 'https://www3.nissan.co.jp/'])
+    # Some brands serve content on www2/www3 subdomains; check those as well if configured.
+    extra_hosts = get_config().get('extra_site_standard_hosts', [])
+    for eh in extra_hosts:
+        eh = eh.strip().rstrip('/')
+        if eh and f'{scheme}://{eh}/' not in bases:
+            bases.append(f'{scheme}://{eh}/')
     out = []
     seen = set()
     for b in bases:
