@@ -123,8 +123,28 @@ def domain(url: str) -> str:
 
 
 def is_owned(url: str) -> bool:
+    """Check if a URL belongs to the brand's owned ecosystem.
+
+    Uses OWNED_HINTS (populated from --owned-domains CLI or auto-derived from
+    --domain). Also performs fuzzy brand-name matching against the domain to
+    catch related ecosystem domains like nissan-global.com, nismo.co.jp etc.
+    """
     d = domain(url)
-    return any(h in d for h in OWNED_HINTS)
+    if not d:
+        return False
+    # Direct hint match
+    if any(h in d for h in OWNED_HINTS):
+        return True
+    # Fuzzy brand ecosystem match: if the brand name appears in the domain
+    # and it's not a known competitor domain, treat it as owned.
+    brand_lower = getattr(is_owned, '_brand_lower', '')
+    if brand_lower and len(brand_lower) >= 3 and brand_lower in d:
+        # Make sure it's not a competitor domain
+        for comp_name, comp_variants in COMPETITORS.items():
+            if any(v.lower() in d for v in comp_variants):
+                return False
+        return True
+    return False
 
 
 def source_type(url: str, raw: str = "") -> str:
@@ -1241,16 +1261,62 @@ def aggregate_pr_opportunities(qwork: list[dict], max_items: int = 20) -> tuple[
     actions.sort(key=lambda a:({'High':0,'Medium':1}.get(a['priority'],2), -a.get('query_coverage_count',0), -a.get('value_score',0)))
     return out[:max_items], actions[:max_items]
 
-def visibility_score(status: str, owned_target: bool, owned_domain: bool, competitors: list[str], external_count: int) -> int:
-    score=0
-    if owned_target: score+=55
-    elif owned_domain: score+=30
-    if not competitors: score+=15
-    else: score+=max(0, 12-len(competitors)*4)
-    score+=min(20, external_count*4)
-    if "competitor" in status: score-=15
-    if "external" in status: score-=8
-    return max(0,min(100,score))
+def visibility_score(status: str, owned_target: bool, owned_domain: bool, competitors: list[str], external_count: int, mapped_geo_scores: list[int] | None = None) -> int:
+    """Revised AI Visibility Score (0-100).
+
+    The score now accounts for:
+    - Whether the brand's owned target page was cited (strongest signal)
+    - Whether any owned-domain page was cited
+    - Mapped owned URL GEO readiness (high GEO = ready to be cited, partial credit)
+    - External citation evidence (moderate positive signal)
+    - Competitor presence (moderate penalty, not extreme)
+    - Owned ecosystem breadth
+
+    Key changes from v1:
+    - Mapped owned URLs with high GEO scores now contribute partial credit even
+      when not yet cited, reflecting page readiness.
+    - Competitor penalty is less punitive: 1 competitor no longer drops to ~5.
+    - External-led queries get a fairer baseline score.
+    """
+    score = 0
+
+    # 1. Owned citation status (0-50 pts)
+    if owned_target:
+        score += 50
+    elif owned_domain:
+        score += 30
+
+    # 2. Mapped owned URL GEO readiness bonus (0-15 pts)
+    # Even if not cited, high-GEO pages show the brand is ready to be cited.
+    if mapped_geo_scores:
+        best_geo = max(mapped_geo_scores) if mapped_geo_scores else 0
+        if best_geo >= 80:
+            score += 15
+        elif best_geo >= 60:
+            score += 10
+        elif best_geo >= 40:
+            score += 5
+
+    # 3. External citation evidence (0-15 pts)
+    # Having external citations is a positive signal — the query has AI answer evidence.
+    score += min(15, external_count * 5)
+
+    # 4. Competitor presence penalty (0 to -20 pts)
+    # Moderate, proportional penalty — not cliff-edge.
+    if competitors:
+        score -= min(20, len(competitors) * 8)
+    else:
+        score += 10  # No competitor = positive signal
+
+    # 5. Status-based adjustment
+    if "competitor" in status:
+        score -= 5
+    elif "external" in status:
+        score -= 2
+    elif "owned_target" in status:
+        score += 10
+
+    return max(0, min(100, score))
 
 
 
@@ -1339,11 +1405,22 @@ def build_brand_topic_scorecard(qwork: list[dict], run_history: list[dict] | Non
         if citation_count == 0:
             relative = "Requires fresh AI citation evidence"
         elif top_comp:
-            relative = f"Benchmark against {top_comp}"
+            # Compare brand's AI visibility score against the top competitor's citation dominance.
+            comp_citation_count = grp["competitors"].most_common(1)[0][1] if grp["competitors"] else 0
+            brand_owned_pct = round(grp["owned_target_citations"] / max(1, query_count) * 100)
+            comp_pct = round(comp_citation_count / max(1, query_count) * 100)
+            if avg_score is not None and avg_score >= 50:
+                relative = f"Brand leads vs {top_comp} ({brand_owned_pct}% owned cited vs {comp_pct}% competitor cited)"
+            elif avg_score is not None and avg_score >= 25:
+                relative = f"Contested with {top_comp} ({brand_owned_pct}% owned cited vs {comp_pct}% competitor cited)"
+            else:
+                relative = f"{top_comp} dominates ({comp_pct}% competitor cited vs {brand_owned_pct}% owned cited)"
         elif grp["owned_target_citations"]:
-            relative = "Owned target pages present in citation set"
+            brand_owned_pct = round(grp["owned_target_citations"] / max(1, query_count) * 100)
+            relative = f"Owned target pages cited in {brand_owned_pct}% of queries"
         elif grp["owned_domain_citations"]:
-            relative = "Owned domain visible, target-page ownership weak"
+            domain_pct = round(grp["owned_domain_citations"] / max(1, query_count) * 100)
+            relative = f"Owned domain visible in {domain_pct}% of queries, target-page ownership weak"
         else:
             relative = "External/category sources dominate observed citations"
         if grp["delta_values"]:
@@ -1561,7 +1638,7 @@ def build_from_preview(preview: dict, args) -> dict:
         owned_domain=bool(row.get("owned_domain_citations") or any(c.get("is_owned_domain") for c in citations))
         score=row.get("ai_visibility_score")
         try: score=int(float(score))
-        except Exception: score=visibility_score(status,owned_target,owned_domain,competitors,len(top3))
+        except Exception: score=visibility_score(status,owned_target,owned_domain,competitors,len(top3),mapped_geo_scores=[m.get('current_geo_score_120',0) for m in mapped])
         item={
             "query_id":qid,"query":q,"query_type":row.get("query_type") or ("branded" if args.brand and args.brand.lower() in q.lower() else "non_branded"),"journey_category":cat,
             **tax,
@@ -1729,6 +1806,8 @@ def main():
         from urllib.parse import urlparse as _urlparse
         _host = _urlparse(args.domain).netloc.lower() or args.domain.replace('https://','').replace('http://','').split('/')[0].lower()
         OWNED_HINTS = [_host, _host.removeprefix('www.'), f'www.{_host.removeprefix("www.")}']
+    # Set brand name for fuzzy owned-ecosystem detection (e.g. nissan-global.com).
+    is_owned._brand_lower = args.brand.strip().lower() if args.brand else ''
     raw_input=load_json(Path(args.input_json), {}) if args.input_json else {}
     query_portfolio_file = load_json(Path(args.query_portfolio), {}) if args.query_portfolio else load_json(root/'outputs/query_portfolio/query_portfolio.json', {})
     sitemap_inventory_file = load_json(Path(args.sitemap_inventory), {}) if args.sitemap_inventory else load_json(root/'outputs/sitemap/sitemap_inventory.json', {})
@@ -1809,7 +1888,7 @@ def main():
                 owned_domain=any(c.get("is_owned_domain") for c in citations)
                 sc=score_by_q.get(qid,{})
                 try: ai_score=int(float(sc.get("ai_visibility_score")))
-                except Exception: ai_score=visibility_score(status,owned_target,owned_domain,competitors,len(top3))
+                except Exception: ai_score=visibility_score(status,owned_target,owned_domain,competitors,len(top3),mapped_geo_scores=[m.get('current_geo_score_120',0) for m in mapped])
                 item={"query_id":qid,"query":q,"query_type":row.get("query_type") or ("branded" if args.brand and args.brand.lower() in q.lower() else "non_branded"),"journey_category":cat,**tax,"current_ai_visibility":{"score":ai_score,"status":status,"owned_target_cited":owned_target,"owned_domain_cited":owned_domain,"competitors":competitors,"competitor_citation_count":len(competitors),"top_citations":citations[:8]},"mapped_owned_urls":mapped,"external_top3_benchmark":top3,"winning_patterns":pats,"cms_recommendations":cms,"pr_recommendations":pr,"action_items":[],"previous_run_delta":None,"loop_state":"baseline_ready" if not owned_target else "monitor_and_refresh"}
                 item["action_items"]=[{"action":c["title"],"owner":c["owner"],"priority":c["priority"],"effort":"M","status":"Not started","target":c["target_url"],"workstream":"CMS remediation","source_query_id":qid} for c in cms[:3]] + [{"action":p["title"],"owner":p["owner"],"priority":p["priority"],"effort":"M","status":"Not started","target":", ".join(p.get("target_domains_observed") or []),"workstream":"PR / external proof","source_query_id":qid} for p in pr[:1]]
                 for a in item["action_items"]: actions_by_key.setdefault((a["workstream"],a.get("target"),a["action"]), {**a,"linked_query_ids":[]})["linked_query_ids"].append(qid)
