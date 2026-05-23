@@ -1847,6 +1847,33 @@ def main():
     ]
     finalise_frontend_contract(bundle, *contract_sources)
     attach_ai_discoverability_hygiene(bundle, *hygiene_sources)
+
+    # --- Advanced GEO/AEO Recommendation Generator (Epic 3 & 4) ---
+    # Attach advanced_geo_asset to CMS recommendations and
+    # advanced_pr_asset_pack to PR opportunities using the two-pass
+    # fact-matrix architecture. These are optional contract extensions;
+    # existing reports without them continue to work.
+    try:
+        from advanced_cms_generator import attach_advanced_geo_assets_to_bundle
+        from advanced_pr_generator import attach_advanced_pr_asset_packs_to_bundle
+
+        # Collect owned page crawl data for fact matrix extraction.
+        owned_page_sources = (
+            records_list(load_json(root/'outputs/content_intelligence/owned_pages_full.json', {}), ["pages", "owned_pages", "items"])
+            or records_list(load_json(Path(args.owned_pages), {}) if args.owned_pages else {}, ["pages", "owned_pages", "items"])
+            or records_list(load_json(root/'outputs/sitemap/sitemap_inventory.json', {}), ["urls", "pages", "owned_pages", "items"])
+        )
+        attach_advanced_geo_assets_to_bundle(
+            bundle,
+            owned_pages=owned_page_sources,
+            brand=args.brand,
+            language=getattr(args, 'output_language', 'English') or 'en',
+        )
+        attach_advanced_pr_asset_packs_to_bundle(bundle, brand=args.brand)
+    except Exception as adv_err:
+        # Advanced assets are optional; never block the canonical bundle.
+        bundle.setdefault("validation", {})["advanced_geo_aeo_error"] = str(adv_err)
+
     write_json(root/'outputs/query_workbench/query_workbench.json', {"query_workbench": qwork})
     if query_portfolio_file: write_json(root/'outputs/query_portfolio/query_portfolio.normalised.json', query_portfolio_file)
     if sitemap_inventory_file: write_json(root/'outputs/sitemap/sitemap_inventory.normalised.json', sitemap_inventory_file)

@@ -71,10 +71,28 @@
       "additionalProperties": true
     },
     "page_level_cms_recommendations": {
-      "type": "array"
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "advanced_geo_asset": {
+            "$ref": "#/$defs/advancedGeoAsset"
+          }
+        },
+        "additionalProperties": true
+      }
     },
     "grouped_pr_opportunities": {
-      "type": "array"
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "advanced_pr_asset_pack": {
+            "$ref": "#/$defs/advancedPrAssetPack"
+          }
+        },
+        "additionalProperties": true
+      }
     },
     "action_checklist": {
       "type": "array"
@@ -341,6 +359,59 @@
           },
           "additionalProperties": true
         }
+      },
+      "additionalProperties": true
+    },
+    "advancedGeoAsset": {
+      "type": "object",
+      "required": ["schema_version"],
+      "properties": {
+        "schema_version": { "const": "advanced_geo_asset.v1" },
+        "expected_impact_score_10": { "type": "number" },
+        "direct_answer_40_words": { "type": "string" },
+        "html_component": { "type": "string" },
+        "json_ld_strategy": { "enum": ["standalone_id_extension", "full_page_merge_patch"] },
+        "target_anchor_id": { "type": "string" },
+        "json_ld_script": { "type": "string" },
+        "json_ld_merge_notes": { "type": "array", "items": { "type": "string" } },
+        "localized_copy_language": { "type": "string" },
+        "facts_used": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["fact", "source", "source_context_snippet"],
+            "properties": {
+              "fact": { "type": "string" },
+              "value": { "type": "string" },
+              "unit": { "type": "string" },
+              "source": { "enum": ["owned_page", "existing_json_ld", "crawl_metadata", "approved_input"] },
+              "source_context_snippet": { "type": "string" },
+              "source_url": { "type": "string" }
+            },
+            "additionalProperties": true
+          }
+        },
+        "validation_flags": { "type": "array", "items": { "type": "string" } },
+        "legal_review_required": { "type": "boolean" }
+      },
+      "additionalProperties": true
+    },
+    "advancedPrAssetPack": {
+      "type": "object",
+      "required": ["schema_version"],
+      "properties": {
+        "schema_version": { "const": "advanced_pr_asset_pack.v1" },
+        "asset_name": { "type": "string" },
+        "asset_type": { "type": "string" },
+        "information_gain_trigger": { "type": "string" },
+        "unique_brand_data_required": { "type": "array", "items": { "type": "string" } },
+        "target_publisher_types": { "type": "array", "items": { "type": "string" } },
+        "target_domains_observed": { "type": "array", "items": { "type": "string" } },
+        "publisher_format_requirements": { "type": "array", "items": { "type": "string" } },
+        "semantic_triggers": { "type": "array", "items": { "type": "string" } },
+        "suggested_headline": { "type": "string" },
+        "briefing_copy": { "type": "string" },
+        "validation_flags": { "type": "array", "items": { "type": "string" } }
       },
       "additionalProperties": true
     },
