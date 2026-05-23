@@ -170,7 +170,19 @@ def build_advanced_pr_asset_pack(
         validation_flags.append("No observed external domains; publisher targeting is generic.")
     if pr_opp.get("query_coverage_count", 0) < 3:
         validation_flags.append("Low query coverage; PR impact may be limited.")
-    return make_advanced_pr_asset_pack(
+    # New actionable PR fields
+    queries = pr_opp.get("grouped_queries") or []
+    priority_query_texts = [str(q.get("query", "")) for q in queries[:5] if isinstance(q, dict) and q.get("query")]
+    journey_mix = pr_opp.get("journey_mix") or []
+    primary_journey = journey_mix[0].get("journey_category", "") if journey_mix else ""
+    asset_objective = f"Create third-party-referenceable evidence for {source_type.replace('_', ' ')} sources that can shift AI answer citations toward {brand_name} across {len(queries)} buyer queries"
+    target_angle = f"Neutral, data-driven coverage targeting {source_type.replace('_', ' ')} publishers"
+    if primary_journey:
+        target_angle += f" in the {primary_journey} journey category"
+    proof_gap = f"AI answers currently cite external {source_type.replace('_', ' ')} sources for these queries; {brand_name} lacks corroborating third-party evidence"
+    pitch_headline = headline
+
+    result = make_advanced_pr_asset_pack(
         asset_name=asset_name,
         asset_type=asset_type,
         information_gain_trigger=info_gain,
@@ -183,6 +195,14 @@ def build_advanced_pr_asset_pack(
         briefing_copy=briefing,
         validation_flags=validation_flags,
     )
+    # Attach new actionable fields
+    result["asset_objective"] = asset_objective
+    result["target_publication_angle"] = target_angle
+    result["required_brand_data"] = unique_data
+    result["proof_gap_addressed"] = proof_gap
+    result["example_pitch_headline"] = pitch_headline
+    result["priority_queries"] = priority_query_texts
+    return result
 
 
 def attach_advanced_pr_asset_packs_to_bundle(

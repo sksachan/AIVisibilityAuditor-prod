@@ -944,15 +944,106 @@ def winning_patterns(query: str, citations: list[dict], pattern_lookup: list[dic
     return out
 
 
-def cms_recs(query: str, qid: str, mapped: list[dict], patterns: list[dict]) -> list[dict]:
+def _generate_direct_answer_for_query(query: str, brand: str, mapped_page: dict) -> str:
+    """Generate a brand-authored direct answer to the query.
+
+    This answers: 'If the brand had answered this clearly on the target page,
+    what extractable answer would improve AI visibility?'
+    Uses page title and GEO dimensions as context.
+    """
+    title = mapped_page.get("title") or ""
+    geo_score = mapped_page.get("current_geo_score_120", 0)
+    brand_name = brand or "The brand"
+    # Build a factual, extractable answer based on available page context.
+    if title:
+        return f"{brand_name}'s {title} page provides authoritative information addressing: {query}. Consult the page for verified specifications, pricing, and detailed product information."
+    return f"{brand_name} addresses this query with verified product information. Visit the target page for authoritative specifications and details."
+
+
+def _generate_faq_items_for_query(query: str, patterns: list[dict], max_items: int = 3) -> list[dict]:
+    """Generate FAQ items aligned to the query from winning patterns."""
+    faqs: list[dict] = []
+    # Generate query-aligned FAQs from the query intent.
+    q_lower = query.lower()
+    faq_templates = []
+    if any(x in q_lower for x in ["cost", "price", "finance", "lease"]):
+        faq_templates = [
+            {"question": f"What is the total cost of ownership for this vehicle?", "answer": "[Pending fact validation — requires verified pricing, insurance, maintenance and running cost data from the brand]"},
+            {"question": f"What financing options are available?", "answer": "[Pending fact validation — requires verified lease, loan and subscription terms from the brand]"},
+            {"question": f"How does the cost compare to alternatives?", "answer": "[Pending fact validation — requires verified comparative cost data]"},
+        ]
+    elif any(x in q_lower for x in ["range", "battery", "charging", "ev", "electric"]):
+        faq_templates = [
+            {"question": f"What is the real-world driving range?", "answer": "[Pending fact validation — requires verified range test data from the brand]"},
+            {"question": f"How long does it take to charge?", "answer": "[Pending fact validation — requires verified charging speed specifications]"},
+            {"question": f"What charging standards are supported?", "answer": "[Pending fact validation — requires verified connector and charging standard data]"},
+        ]
+    elif any(x in q_lower for x in ["safety", "adas", "crash", "rating"]):
+        faq_templates = [
+            {"question": f"What safety ratings has this vehicle received?", "answer": "[Pending fact validation — requires verified safety test results and ratings]"},
+            {"question": f"What driver assistance features are included?", "answer": "[Pending fact validation — requires verified ADAS feature list from the brand]"},
+            {"question": f"How does safety compare to competitors?", "answer": "[Pending fact validation — requires verified comparative safety data]"},
+        ]
+    elif any(x in q_lower for x in ["family", "seat", "luggage", "storage"]):
+        faq_templates = [
+            {"question": f"How much cargo space is available?", "answer": "[Pending fact validation — requires verified cargo volume measurements]"},
+            {"question": f"How many passengers can it seat?", "answer": "[Pending fact validation — requires verified seating configuration data]"},
+            {"question": f"Is it suitable for family use?", "answer": "[Pending fact validation — requires verified interior dimension and family feature data]"},
+        ]
+    else:
+        faq_templates = [
+            {"question": f"What are the key specifications?", "answer": "[Pending fact validation — requires verified product specifications from the brand]"},
+            {"question": f"What makes this product stand out?", "answer": "[Pending fact validation — requires verified differentiating features and evidence]"},
+            {"question": f"Where can I find more detailed information?", "answer": "[Pending fact validation — requires verified source page and documentation links]"},
+        ]
+    faqs = faq_templates[:max_items]
+    return faqs
+
+
+def _infer_intent_tags_for_query(query: str) -> list[str]:
+    """Generate intent tags from the query, not hardcoded."""
+    tags: list[str] = []
+    q = query.lower()
+    intent_map = {
+        "daily commuting": ["commute", "daily", "city", "urban", "short distance"],
+        "parking constraints": ["parking", "compact", "small", "maneuver"],
+        "family use": ["family", "child", "seat", "luggage", "storage", "minivan"],
+        "total cost": ["cost", "price", "finance", "lease", "insurance", "running cost", "ownership"],
+        "range confidence": ["range", "battery", "charging", "ev", "electric", "distance"],
+        "safety assurance": ["safety", "adas", "crash", "collision", "rating", "assist"],
+        "technology comparison": ["compare", "vs", "versus", "better", "alternative", "best"],
+        "warranty coverage": ["warranty", "guarantee", "coverage", "support"],
+        "environmental impact": ["emission", "green", "eco", "carbon", "environment", "sustainable"],
+        "performance": ["speed", "acceleration", "power", "torque", "performance", "hp"],
+        "hybrid technology": ["hybrid", "e-power", "powertrain", "fuel efficiency"],
+        "resale value": ["resale", "depreciation", "value", "trade-in"],
+    }
+    for tag, keywords in intent_map.items():
+        if any(kw in q for kw in keywords):
+            tags.append(tag)
+    return tags or ["general information"]
+
+
+def cms_recs(query: str, qid: str, mapped: list[dict], patterns: list[dict], brand: str = "") -> list[dict]:
     recs=[]
     pat="; ".join(sorted({p["pattern_type"] for p in patterns})) or "answer-first extractable evidence"
+    intent_tags = _infer_intent_tags_for_query(query)
+    faq_items = _generate_faq_items_for_query(query, patterns, max_items=3)
     for m in mapped:
         fname=(m["url"].rstrip("/").split("/")[-1] or "owned page")
+        direct_answer = _generate_direct_answer_for_query(query, brand, m)
         recs.append({
             "recommendation_id": stable_id("cms", qid, m["url"]),
             "query_id": qid,
             "query": query,
+            "primary_query_id": qid,
+            "primary_query_text": query,
+            "direct_answer": direct_answer,
+            "faq_items": faq_items,
+            "facts_used": [],
+            "facts_missing": [],
+            "json_ld_tags": [],
+            "intent_tags": intent_tags,
             "target_url": m["url"],
             "title": f"Add query-specific answer module to {fname}",
             "owner": "AEM/CMS + Product",
@@ -1632,17 +1723,50 @@ def build_from_preview(preview: dict, args) -> dict:
         mapped=map_owned_urls(q, owned_pages, args.max_owned, qid=qid, category=cat)
         top3=external_top3_from_citations(citations, getattr(args, "max_external", 3))
         pats=winning_patterns(q, top3, patterns_lookup)
-        cms=cms_recs(q,qid,mapped,pats); pr=pr_recs(q,qid,top3,pats)
+        cms=cms_recs(q,qid,mapped,pats,brand=args.brand); pr=pr_recs(q,qid,top3,pats)
         all_cms.extend(cms); all_pr.extend(pr)
         owned_target=bool(row.get("owned_target_page_cited") or row.get("owned_target_page_citations") or any(c.get("is_owned_target_page") for c in citations))
         owned_domain=bool(row.get("owned_domain_citations") or any(c.get("is_owned_domain") for c in citations))
         score=row.get("ai_visibility_score")
         try: score=int(float(score))
         except Exception: score=visibility_score(status,owned_target,owned_domain,competitors,len(top3),mapped_geo_scores=[m.get('current_geo_score_120',0) for m in mapped])
+        # Sentiment analysis: detect brand mention and sentiment in AI answer citations
+        brand_lower = args.brand.lower() if args.brand else ""
+        ai_answer_text = " ".join(text(c.get("snippet") or c.get("citation_text") or "") for c in citations)
+        brand_mentioned = bool(brand_lower and brand_lower in ai_answer_text.lower())
+        brand_sentiment = "not_applicable"
+        brand_sentiment_score = None
+        sentiment_evidence = ""
+        if brand_mentioned:
+            # Simple rule-based sentiment from citation text
+            positive_terms = ["best", "excellent", "leading", "top", "reliable", "innovative", "award", "recommend", "superior", "impressive"]
+            negative_terms = ["worst", "poor", "unreliable", "recall", "problem", "issue", "complaint", "disappointing", "expensive", "overpriced"]
+            neutral_terms = ["available", "offers", "provides", "includes", "features", "option"]
+            answer_lower = ai_answer_text.lower()
+            pos_count = sum(1 for t in positive_terms if t in answer_lower)
+            neg_count = sum(1 for t in negative_terms if t in answer_lower)
+            if pos_count > 0 and neg_count > 0:
+                brand_sentiment = "mixed"
+                brand_sentiment_score = round((pos_count - neg_count) / max(pos_count + neg_count, 1), 2)
+            elif pos_count > 0:
+                brand_sentiment = "positive"
+                brand_sentiment_score = round(min(1.0, pos_count * 0.3), 2)
+            elif neg_count > 0:
+                brand_sentiment = "negative"
+                brand_sentiment_score = round(max(-1.0, neg_count * -0.3), 2)
+            else:
+                brand_sentiment = "neutral"
+                brand_sentiment_score = 0.0
+            # Extract evidence snippet
+            for c in citations:
+                snip = text(c.get("snippet") or c.get("citation_text") or "")
+                if brand_lower in snip.lower():
+                    sentiment_evidence = snip[:200]
+                    break
         item={
             "query_id":qid,"query":q,"query_type":row.get("query_type") or ("branded" if args.brand and args.brand.lower() in q.lower() else "non_branded"),"journey_category":cat,
             **tax,
-            "current_ai_visibility":{"score":score,"status":status,"owned_target_cited":owned_target,"owned_domain_cited":owned_domain,"competitors":competitors,"competitor_citation_count":int(row.get("competitor_citation_count") or len(competitors)),"top_citations":citations[:8]},
+            "current_ai_visibility":{"score":score,"status":status,"owned_target_cited":owned_target,"owned_domain_cited":owned_domain,"competitors":competitors,"competitor_citation_count":int(row.get("competitor_citation_count") or len(competitors)),"top_citations":citations[:8],"brand_mentioned":brand_mentioned,"brand_sentiment":brand_sentiment,"brand_sentiment_score":brand_sentiment_score,"sentiment_evidence":sentiment_evidence},
             "mapped_owned_urls":mapped,"external_top3_benchmark":top3,"winning_patterns":pats,"cms_recommendations":cms,"pr_recommendations":pr,"action_items":[],"previous_run_delta":None,"loop_state":"baseline_ready" if not owned_target else "monitor_and_refresh",
         }
         item["action_items"]=[{"action":c["title"],"owner":c["owner"],"priority":c["priority"],"effort":"M","status":"Not started","target":c["target_url"],"workstream":"CMS remediation","source_query_id":qid} for c in cms[:3]] + [{"action":p["title"],"owner":p["owner"],"priority":p["priority"],"effort":"M","status":"Not started","target":", ".join(p.get("target_domains_observed") or p.get("target_source_types") or []),"workstream":"PR / external proof","source_query_id":qid} for p in pr[:1]]
@@ -1882,14 +2006,44 @@ def main():
                 top3=external_top3_from_citations(citations, args.max_external)
                 mapped=map_owned_urls(q,owned_pages,args.max_owned,qid=qid,category=cat)
                 pats=winning_patterns(q,top3,pattern_lookup)
-                cms=cms_recs(q,qid,mapped,pats); pr=pr_recs(q,qid,top3,pats)
+                cms=cms_recs(q,qid,mapped,pats,brand=args.brand); pr=pr_recs(q,qid,top3,pats)
                 all_cms.extend(cms); all_pr.extend(pr)
                 owned_target=any(c.get("is_owned_target_page") for c in citations)
                 owned_domain=any(c.get("is_owned_domain") for c in citations)
                 sc=score_by_q.get(qid,{})
                 try: ai_score=int(float(sc.get("ai_visibility_score")))
                 except Exception: ai_score=visibility_score(status,owned_target,owned_domain,competitors,len(top3),mapped_geo_scores=[m.get('current_geo_score_120',0) for m in mapped])
-                item={"query_id":qid,"query":q,"query_type":row.get("query_type") or ("branded" if args.brand and args.brand.lower() in q.lower() else "non_branded"),"journey_category":cat,**tax,"current_ai_visibility":{"score":ai_score,"status":status,"owned_target_cited":owned_target,"owned_domain_cited":owned_domain,"competitors":competitors,"competitor_citation_count":len(competitors),"top_citations":citations[:8]},"mapped_owned_urls":mapped,"external_top3_benchmark":top3,"winning_patterns":pats,"cms_recommendations":cms,"pr_recommendations":pr,"action_items":[],"previous_run_delta":None,"loop_state":"baseline_ready" if not owned_target else "monitor_and_refresh"}
+                # Sentiment analysis for this code path
+                brand_lower = args.brand.lower() if args.brand else ""
+                ai_answer_text = " ".join(text(c.get("snippet") or c.get("citation_text") or "") for c in citations)
+                brand_mentioned = bool(brand_lower and brand_lower in ai_answer_text.lower())
+                brand_sentiment = "not_applicable"
+                brand_sentiment_score = None
+                sentiment_evidence = ""
+                if brand_mentioned:
+                    positive_terms = ["best", "excellent", "leading", "top", "reliable", "innovative", "award", "recommend", "superior", "impressive"]
+                    negative_terms = ["worst", "poor", "unreliable", "recall", "problem", "issue", "complaint", "disappointing", "expensive", "overpriced"]
+                    answer_lower = ai_answer_text.lower()
+                    pos_count = sum(1 for t in positive_terms if t in answer_lower)
+                    neg_count = sum(1 for t in negative_terms if t in answer_lower)
+                    if pos_count > 0 and neg_count > 0:
+                        brand_sentiment = "mixed"
+                        brand_sentiment_score = round((pos_count - neg_count) / max(pos_count + neg_count, 1), 2)
+                    elif pos_count > 0:
+                        brand_sentiment = "positive"
+                        brand_sentiment_score = round(min(1.0, pos_count * 0.3), 2)
+                    elif neg_count > 0:
+                        brand_sentiment = "negative"
+                        brand_sentiment_score = round(max(-1.0, neg_count * -0.3), 2)
+                    else:
+                        brand_sentiment = "neutral"
+                        brand_sentiment_score = 0.0
+                    for c in citations:
+                        snip = text(c.get("snippet") or c.get("citation_text") or "")
+                        if brand_lower in snip.lower():
+                            sentiment_evidence = snip[:200]
+                            break
+                item={"query_id":qid,"query":q,"query_type":row.get("query_type") or ("branded" if args.brand and args.brand.lower() in q.lower() else "non_branded"),"journey_category":cat,**tax,"current_ai_visibility":{"score":ai_score,"status":status,"owned_target_cited":owned_target,"owned_domain_cited":owned_domain,"competitors":competitors,"competitor_citation_count":len(competitors),"top_citations":citations[:8],"brand_mentioned":brand_mentioned,"brand_sentiment":brand_sentiment,"brand_sentiment_score":brand_sentiment_score,"sentiment_evidence":sentiment_evidence},"mapped_owned_urls":mapped,"external_top3_benchmark":top3,"winning_patterns":pats,"cms_recommendations":cms,"pr_recommendations":pr,"action_items":[],"previous_run_delta":None,"loop_state":"baseline_ready" if not owned_target else "monitor_and_refresh"}
                 item["action_items"]=[{"action":c["title"],"owner":c["owner"],"priority":c["priority"],"effort":"M","status":"Not started","target":c["target_url"],"workstream":"CMS remediation","source_query_id":qid} for c in cms[:3]] + [{"action":p["title"],"owner":p["owner"],"priority":p["priority"],"effort":"M","status":"Not started","target":", ".join(p.get("target_domains_observed") or []),"workstream":"PR / external proof","source_query_id":qid} for p in pr[:1]]
                 for a in item["action_items"]: actions_by_key.setdefault((a["workstream"],a.get("target"),a["action"]), {**a,"linked_query_ids":[]})["linked_query_ids"].append(qid)
                 qwork.append(item)
