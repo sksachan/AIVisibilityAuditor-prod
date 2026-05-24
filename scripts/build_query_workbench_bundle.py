@@ -1196,10 +1196,13 @@ def _merge_cms_content_modules(page_cms: list[dict], content_modules: list[dict]
                         break
         if not matched_rec:
             continue
-        # Merge enriched LLM fields into the canonical recommendation
-        if module.get("direct_answer") and not matched_rec.get("direct_answer"):
+        # Merge enriched LLM fields into the canonical recommendation.
+        # LLM output is CANONICAL — it always overrides deterministic fallback.
+        # Deterministic fields contain placeholders like "[Pending]" or "[Direct answer pending]";
+        # the LLM produces fact-constrained real content.
+        if module.get("direct_answer"):
             matched_rec["direct_answer"] = module["direct_answer"]
-        if module.get("faq_items") and (not matched_rec.get("faq_items") or all("[Pending" in str(f.get("answer", "")) for f in matched_rec.get("faq_items", []))):
+        if module.get("faq_items") and isinstance(module["faq_items"], list):
             matched_rec["faq_items"] = module["faq_items"]
         if module.get("facts_used"):
             matched_rec["facts_used"] = module["facts_used"]
@@ -1207,9 +1210,9 @@ def _merge_cms_content_modules(page_cms: list[dict], content_modules: list[dict]
             existing_missing = matched_rec.get("facts_missing") or []
             new_missing = [f for f in module["facts_missing"] if f not in existing_missing]
             matched_rec["facts_missing"] = existing_missing + new_missing
-        if module.get("json_ld_tags") and not matched_rec.get("json_ld_tags"):
+        if module.get("json_ld_tags"):
             matched_rec["json_ld_tags"] = module["json_ld_tags"]
-        if module.get("intent_tags") and not matched_rec.get("intent_tags"):
+        if module.get("intent_tags"):
             matched_rec["intent_tags"] = module["intent_tags"]
         # Merge copy modules for frontend rendering
         if module.get("copy_modules") or module.get("copyModules"):
