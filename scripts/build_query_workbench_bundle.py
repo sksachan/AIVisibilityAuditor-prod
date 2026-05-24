@@ -1919,6 +1919,7 @@ def main():
     ap.add_argument("--enable-external-crawl", default="false")
     ap.add_argument("--query-limit", type=int, default=0)
     ap.add_argument("--output-language", default="English")
+    ap.add_argument("--brand-terms", default="", help="Comma-separated brand terms, model names, sub-brands for branded vs non-branded classification")
     args=ap.parse_args()
     root=Path(args.project_root).resolve()
     # Populate OWNED_HINTS from --owned-domains CLI arg for multi-brand support.
@@ -1932,6 +1933,15 @@ def main():
         OWNED_HINTS = [_host, _host.removeprefix('www.'), f'www.{_host.removeprefix("www.")}']
     # Set brand name for fuzzy owned-ecosystem detection (e.g. nissan-global.com).
     is_owned._brand_lower = args.brand.strip().lower() if args.brand else ''
+    # Populate brand terms from --brand-terms CLI arg for branded/non-branded classification.
+    if args.brand_terms:
+        _brand_terms = [t.strip() for t in args.brand_terms.split(',') if t.strip()]
+        if _brand_terms:
+            # Add brand terms to OWNED_HINTS for owned-ecosystem detection
+            for term in _brand_terms:
+                low = term.lower()
+                if low and low not in OWNED_HINTS:
+                    OWNED_HINTS.append(low)
     raw_input=load_json(Path(args.input_json), {}) if args.input_json else {}
     query_portfolio_file = load_json(Path(args.query_portfolio), {}) if args.query_portfolio else load_json(root/'outputs/query_portfolio/query_portfolio.json', {})
     sitemap_inventory_file = load_json(Path(args.sitemap_inventory), {}) if args.sitemap_inventory else load_json(root/'outputs/sitemap/sitemap_inventory.json', {})
