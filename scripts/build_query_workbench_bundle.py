@@ -1157,70 +1157,142 @@ def _identify_missing_facts(query: str, mapped_page: dict) -> list[str]:
     return missing
 
 
-def _merge_cms_content_modules(page_cms: list[dict], content_modules: list[dict]) -> None:
+def _normalise_merge_url(raw_url: str) -> str:
+    """Normalise URL for merge matching: strip protocol, www, trailing slash, lowercase."""
+    u = (raw_url or "").strip().rstrip("/").lower()
+    for prefix in ["https://", "http://"]:
+        if u.startswith(prefix):
+            u = u[len(prefix):]
+    if u.startswith("www."):
+        u = u[4:]
+    return u.rstrip("/")
+
+
+def _merge_cms_content_modules(page_cms: list[dict], content_modules: list[dict]) -> dict:
     """Merge Bodhi LLM cms_ready_content_modules into page_level_cms_recommendations.
 
-    Matches by target_owned_url, source_recommendation_id, or linked query IDs.
-    Populates frontend-facing fields: copyModules, directAnswer, faqItems,
-    factsUsed, factsMissing, jsonLdTags, intentTags.
+    Matches by:
+      1. source_recommendation_id === recommendation_id
+      2. normalised target_owned_url === target_url
+      3. overlapping linked_query_ids
+
+    Overwrites weak deterministic fields with LLM values.
+    Creates frontend-facing copy_modules from heading/intro_copy/body_copy/bullets.
+    Returns cms_merge_status dict for validation guardrail.
     """
     # Build lookup indexes for matching
     cms_by_url: dict[str, dict] = {}
     cms_by_rec_id: dict[str, dict] = {}
     for rec in page_cms:
-        url = (rec.get("target_url") or rec.get("url") or "").rstrip("/").lower()
+        url = _normalise_merge_url(rec.get("target_url") or rec.get("url") or "")
         if url:
             cms_by_url[url] = rec
         rec_id = rec.get("recommendation_id") or ""
         if rec_id:
             cms_by_rec_id[rec_id] = rec
+
+    merged_count = 0
+    unmerged_ids = []
+
     for module in content_modules:
         if not isinstance(module, dict):
             continue
-        # Find matching CMS recommendation
-        target_url = (module.get("target_owned_url") or module.get("target_url") or "").rstrip("/").lower()
+        # Find matching CMS recommendation — match in priority order
+        target_url = _normalise_merge_url(module.get("target_owned_url") or module.get("target_url") or "")
         source_rec_id = module.get("source_recommendation_id") or module.get("recommendation_id") or ""
         matched_rec = None
-        if target_url and target_url in cms_by_url:
-            matched_rec = cms_by_url[target_url]
-        elif source_rec_id and source_rec_id in cms_by_rec_id:
+
+        # Priority 1: source_recommendation_id === recommendation_id
+        if source_rec_id and source_rec_id in cms_by_rec_id:
             matched_rec = cms_by_rec_id[source_rec_id]
+        # Priority 2: normalised target_owned_url === target_url
+        elif target_url and target_url in cms_by_url:
+            matched_rec = cms_by_url[target_url]
         else:
-            # Try matching by linked query IDs
+            # Priority 3: overlapping linked_query_ids
             module_qids = set(str(q) for q in (module.get("linked_query_ids") or module.get("query_ids") or []))
             if module_qids:
                 for rec in page_cms:
-                    rec_qids = set(str(q.get("query_id") if isinstance(q, dict) else q) for q in (rec.get("linked_queries") or rec.get("linked_query_ids") or []))
+                    rec_qids = set(
+                        str(q.get("query_id") if isinstance(q, dict) else q)
+                        for q in (rec.get("linked_queries") or rec.get("linked_query_ids") or [])
+                    )
                     if module_qids & rec_qids:
                         matched_rec = rec
                         break
+
         if not matched_rec:
+            mod_id = source_rec_id or module.get("module_id") or target_url or "unknown"
+            unmerged_ids.append(mod_id)
             continue
-        # Merge enriched LLM fields into the canonical recommendation.
+
+        # --- Overwrite weak deterministic fields with LLM values ---
         # LLM output is CANONICAL — it always overrides deterministic fallback.
         # Deterministic fields contain placeholders like "[Pending]" or "[Direct answer pending]";
         # the LLM produces fact-constrained real content.
-        if module.get("direct_answer"):
-            matched_rec["direct_answer"] = module["direct_answer"]
-        if module.get("faq_items") and isinstance(module["faq_items"], list):
-            matched_rec["faq_items"] = module["faq_items"]
-        if module.get("facts_used"):
-            matched_rec["facts_used"] = module["facts_used"]
-        if module.get("facts_missing"):
-            existing_missing = matched_rec.get("facts_missing") or []
-            new_missing = [f for f in module["facts_missing"] if f not in existing_missing]
-            matched_rec["facts_missing"] = existing_missing + new_missing
-        if module.get("json_ld_tags"):
-            matched_rec["json_ld_tags"] = module["json_ld_tags"]
-        if module.get("intent_tags"):
-            matched_rec["intent_tags"] = module["intent_tags"]
-        # Merge copy modules for frontend rendering
-        if module.get("copy_modules") or module.get("copyModules"):
-            matched_rec["copy_modules"] = module.get("copy_modules") or module.get("copyModules")
-        # Merge intro/body copy if richer than existing
-        for copy_field in ["intro_copy", "body_copy", "heading", "bullets"]:
-            if module.get(copy_field) and not matched_rec.get(copy_field):
-                matched_rec[copy_field] = module[copy_field]
+        _LLM_OVERWRITE_FIELDS = [
+            "direct_answer", "faq_items", "facts_used", "facts_missing",
+            "json_ld_tags", "intent_tags", "recommended_placement",
+            "heading", "intro_copy", "body_copy", "bullets",
+            "evidence_basis", "validation_required",
+        ]
+        for field in _LLM_OVERWRITE_FIELDS:
+            llm_val = module.get(field)
+            if llm_val is None:
+                continue
+            # For lists, only overwrite if LLM list is non-empty
+            if isinstance(llm_val, list) and not llm_val:
+                continue
+            # For strings, only overwrite if LLM string is non-empty
+            if isinstance(llm_val, str) and not llm_val.strip():
+                continue
+            # Special handling for facts_missing: merge, don't replace
+            if field == "facts_missing":
+                existing = matched_rec.get("facts_missing") or []
+                new_items = [f for f in llm_val if f not in existing]
+                matched_rec["facts_missing"] = existing + new_items
+            else:
+                matched_rec[field] = llm_val
+
+        # Merge primary query metadata
+        if module.get("primary_query_id"):
+            matched_rec["primary_query_id"] = module["primary_query_id"]
+        if module.get("primary_query_text"):
+            matched_rec["primary_query_text"] = module["primary_query_text"]
+
+        # --- Create frontend-facing copy_modules ---
+        # If the LLM module has heading/intro_copy/body_copy/bullets,
+        # construct a copy_modules array for the frontend.
+        existing_copy_modules = module.get("copy_modules") or module.get("copyModules")
+        if existing_copy_modules and isinstance(existing_copy_modules, list):
+            matched_rec["copy_modules"] = existing_copy_modules
+        else:
+            # Build copy_modules from flat fields on the LLM module
+            heading = module.get("heading") or matched_rec.get("heading") or matched_rec.get("title") or ""
+            intro = module.get("intro_copy") or ""
+            body = module.get("body_copy") or ""
+            bullets = module.get("bullets") or []
+            faq = module.get("faq_items") or []
+            if heading or intro or body or bullets:
+                matched_rec["copy_modules"] = [{
+                    "module_id": source_rec_id or stable_id("copym", target_url, heading),
+                    "heading": heading,
+                    "intro_copy": intro,
+                    "body_copy": body,
+                    "bullets": bullets if isinstance(bullets, list) else [],
+                    "faq_items": faq if isinstance(faq, list) else [],
+                }]
+
+        # Mark as LLM-merged so frontend can distinguish
+        matched_rec["cms_llm_merged"] = True
+        merged_count += 1
+
+    # Return merge status for validation guardrail
+    return {
+        "cms_ready_modules": len(content_modules),
+        "merged_into_page_recommendations": merged_count,
+        "unmerged_module_ids": unmerged_ids,
+    }
 
 
 def cms_recs(query: str, qid: str, mapped: list[dict], patterns: list[dict], brand: str = "") -> list[dict]:
@@ -2327,10 +2399,16 @@ def main():
     cms_content_modules = bundle.get("cms_ready_content_modules")
     if isinstance(cms_content_modules, list) and cms_content_modules:
         page_cms = bundle.get("page_level_cms_recommendations") or bundle.get("cms_recommendations") or []
-        _merge_cms_content_modules(page_cms, cms_content_modules)
+        cms_merge_status = _merge_cms_content_modules(page_cms, cms_content_modules)
         bundle["page_level_cms_recommendations"] = page_cms
         bundle["cms_recommendations"] = page_cms
-        bundle.setdefault("parser_manifest", {})["cms_content_modules_merged"] = len(cms_content_modules)
+        bundle["cms_merge_status"] = cms_merge_status
+        bundle.setdefault("parser_manifest", {})["cms_content_modules_merged"] = cms_merge_status["merged_into_page_recommendations"]
+        # Surface unmerged modules as quality warning
+        if cms_merge_status["unmerged_module_ids"]:
+            bundle.setdefault("validation", {}).setdefault("quality_warnings", []).append(
+                f"CMS LLM produced {cms_merge_status['cms_ready_modules']} modules but {len(cms_merge_status['unmerged_module_ids'])} could not be matched to page_level_cms_recommendations: {', '.join(cms_merge_status['unmerged_module_ids'][:5])}"
+            )
 
     # --- Advanced GEO/AEO Recommendation Generator (Epic 3) ---
     # Attach advanced_geo_asset to CMS recommendations using the two-pass
