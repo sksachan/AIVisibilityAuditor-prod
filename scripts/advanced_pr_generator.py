@@ -175,11 +175,12 @@ def build_advanced_pr_asset_pack(
     priority_query_texts = [str(q.get("query", "")) for q in queries[:5] if isinstance(q, dict) and q.get("query")]
     journey_mix = pr_opp.get("journey_mix") or []
     primary_journey = journey_mix[0].get("journey_category", "") if journey_mix else ""
-    asset_objective = f"Create third-party-referenceable evidence for {source_type.replace('_', ' ')} sources that can shift AI answer citations toward {brand_name} across {len(queries)} buyer queries"
+    effective_brand = brand or "the brand"
+    asset_objective = f"Create third-party-referenceable evidence for {source_type.replace('_', ' ')} sources that can shift AI answer citations toward {effective_brand} across {len(queries)} buyer queries"
     target_angle = f"Neutral, data-driven coverage targeting {source_type.replace('_', ' ')} publishers"
     if primary_journey:
         target_angle += f" in the {primary_journey} journey category"
-    proof_gap = f"AI answers currently cite external {source_type.replace('_', ' ')} sources for these queries; {brand_name} lacks corroborating third-party evidence"
+    proof_gap = f"AI answers currently cite external {source_type.replace('_', ' ')} sources for these queries; {effective_brand} lacks corroborating third-party evidence"
     pitch_headline = headline
 
     result = make_advanced_pr_asset_pack(

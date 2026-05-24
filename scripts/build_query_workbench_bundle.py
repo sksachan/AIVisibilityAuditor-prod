@@ -947,57 +947,113 @@ def winning_patterns(query: str, citations: list[dict], pattern_lookup: list[dic
 def _generate_direct_answer_for_query(query: str, brand: str, mapped_page: dict) -> str:
     """Generate a brand-authored direct answer to the query.
 
-    This answers: 'If the brand had answered this clearly on the target page,
-    what extractable answer would improve AI visibility?'
-    Uses page title and GEO dimensions as context.
+    This is a FALLBACK only. The preferred source is Bodhi CMS LLM output
+    constrained by verified facts. This function produces a structured
+    answer template that includes the actual query text and references
+    only verified owned-page facts.
     """
     title = mapped_page.get("title") or ""
+    url = mapped_page.get("url") or ""
     geo_score = mapped_page.get("current_geo_score_120", 0)
+    geo_dims = mapped_page.get("geo_dimensions") or {}
     brand_name = brand or "The brand"
-    # Build a factual, extractable answer based on available page context.
+    # Extract any available facts from the page context
+    facts_available = []
     if title:
-        return f"{brand_name}'s {title} page provides authoritative information addressing: {query}. Consult the page for verified specifications, pricing, and detailed product information."
-    return f"{brand_name} addresses this query with verified product information. Visit the target page for authoritative specifications and details."
+        facts_available.append(f"page: {title}")
+    if geo_dims.get("structured_data", 0) >= 12:
+        facts_available.append("JSON-LD/schema markup present")
+    if geo_dims.get("faq_readiness", 0) >= 8:
+        facts_available.append("FAQ content detected")
+    if geo_dims.get("eeat_signals", 0) >= 12:
+        facts_available.append("E-E-A-T signals present")
+    # Build answer that directly addresses the query
+    if facts_available:
+        facts_str = "; ".join(facts_available)
+        return (
+            f"For the query '{query}': {brand_name} provides verified information "
+            f"on the target page ({facts_str}). "
+            f"[Direct answer pending — requires Bodhi CMS LLM generation with "
+            f"fact-constrained output from owned page crawl evidence.]"
+        )
+    return (
+        f"For the query '{query}': {brand_name} should provide a direct, "
+        f"extractable answer on the target page. "
+        f"[Direct answer pending — requires Bodhi CMS LLM generation. "
+        f"No verified owned-page facts available yet for this query.]"
+    )
 
 
 def _generate_faq_items_for_query(query: str, patterns: list[dict], max_items: int = 3) -> list[dict]:
-    """Generate FAQ items aligned to the query from winning patterns."""
+    """Generate FAQ items aligned to the query from winning patterns.
+
+    Produces at least 3 query-aligned Q&A pairs per recommendation.
+    Uses winning pattern evidence to create more specific questions.
+    When verified facts are unavailable, marks answers as pending validation
+    with clear guidance on what data is needed.
+    """
     faqs: list[dict] = []
-    # Generate query-aligned FAQs from the query intent.
     q_lower = query.lower()
+    # Extract evidence from winning patterns for more specific answers
+    pattern_evidence = []
+    for p in patterns:
+        snippet = text(p.get("evidence_basis") or p.get("pattern_type") or "")
+        if snippet and "extractable" not in snippet.lower():
+            pattern_evidence.append(snippet)
+    evidence_note = (
+        f" Evidence from external sources suggests: {pattern_evidence[0][:150]}"
+        if pattern_evidence else ""
+    )
+    # Build query-specific FAQs that directly relate to the user's question
     faq_templates = []
-    if any(x in q_lower for x in ["cost", "price", "finance", "lease"]):
-        faq_templates = [
-            {"question": f"What is the total cost of ownership for this vehicle?", "answer": "[Pending fact validation — requires verified pricing, insurance, maintenance and running cost data from the brand]"},
-            {"question": f"What financing options are available?", "answer": "[Pending fact validation — requires verified lease, loan and subscription terms from the brand]"},
-            {"question": f"How does the cost compare to alternatives?", "answer": "[Pending fact validation — requires verified comparative cost data]"},
-        ]
-    elif any(x in q_lower for x in ["range", "battery", "charging", "ev", "electric"]):
-        faq_templates = [
-            {"question": f"What is the real-world driving range?", "answer": "[Pending fact validation — requires verified range test data from the brand]"},
-            {"question": f"How long does it take to charge?", "answer": "[Pending fact validation — requires verified charging speed specifications]"},
-            {"question": f"What charging standards are supported?", "answer": "[Pending fact validation — requires verified connector and charging standard data]"},
-        ]
-    elif any(x in q_lower for x in ["safety", "adas", "crash", "rating"]):
-        faq_templates = [
-            {"question": f"What safety ratings has this vehicle received?", "answer": "[Pending fact validation — requires verified safety test results and ratings]"},
-            {"question": f"What driver assistance features are included?", "answer": "[Pending fact validation — requires verified ADAS feature list from the brand]"},
-            {"question": f"How does safety compare to competitors?", "answer": "[Pending fact validation — requires verified comparative safety data]"},
-        ]
-    elif any(x in q_lower for x in ["family", "seat", "luggage", "storage"]):
-        faq_templates = [
-            {"question": f"How much cargo space is available?", "answer": "[Pending fact validation — requires verified cargo volume measurements]"},
-            {"question": f"How many passengers can it seat?", "answer": "[Pending fact validation — requires verified seating configuration data]"},
-            {"question": f"Is it suitable for family use?", "answer": "[Pending fact validation — requires verified interior dimension and family feature data]"},
-        ]
+    # Primary FAQ: directly rephrase the query as a question
+    primary_q = query.rstrip("?").strip()
+    if not primary_q.startswith(("What", "How", "Why", "When", "Where", "Is", "Can", "Does", "Do")):
+        primary_q = f"What should I know about {primary_q}?"
     else:
-        faq_templates = [
-            {"question": f"What are the key specifications?", "answer": "[Pending fact validation — requires verified product specifications from the brand]"},
-            {"question": f"What makes this product stand out?", "answer": "[Pending fact validation — requires verified differentiating features and evidence]"},
-            {"question": f"Where can I find more detailed information?", "answer": "[Pending fact validation — requires verified source page and documentation links]"},
-        ]
-    faqs = faq_templates[:max_items]
-    return faqs
+        primary_q = f"{primary_q}?"
+    faq_templates.append({
+        "question": primary_q,
+        "answer": f"[Pending fact validation — requires verified brand data to answer: {query}.{evidence_note}]"
+    })
+    # Intent-specific follow-up FAQs
+    if any(x in q_lower for x in ["cost", "price", "finance", "lease"]):
+        faq_templates.extend([
+            {"question": "What is the total cost of ownership including insurance and maintenance?", "answer": "[Pending fact validation — requires verified pricing, insurance, maintenance and running cost data from the brand]"},
+            {"question": "What financing or leasing options are available for this model?", "answer": "[Pending fact validation — requires verified lease, loan and subscription terms from the brand]"},
+        ])
+    elif any(x in q_lower for x in ["range", "battery", "charging", "ev", "electric"]):
+        faq_templates.extend([
+            {"question": "What is the real-world driving range under typical conditions?", "answer": "[Pending fact validation — requires verified range test data from the brand]"},
+            {"question": "How long does it take to charge from 10% to 80%?", "answer": "[Pending fact validation — requires verified charging speed specifications]"},
+        ])
+    elif any(x in q_lower for x in ["safety", "adas", "crash", "rating"]):
+        faq_templates.extend([
+            {"question": "What official safety ratings has this vehicle received?", "answer": "[Pending fact validation — requires verified safety test results and ratings]"},
+            {"question": "What active safety and driver assistance features are standard?", "answer": "[Pending fact validation — requires verified ADAS feature list from the brand]"},
+        ])
+    elif any(x in q_lower for x in ["family", "seat", "luggage", "storage"]):
+        faq_templates.extend([
+            {"question": "How much cargo space is available with all seats up?", "answer": "[Pending fact validation — requires verified cargo volume measurements]"},
+            {"question": "What child safety and family convenience features are included?", "answer": "[Pending fact validation — requires verified family feature data]"},
+        ])
+    elif any(x in q_lower for x in ["warranty", "guarantee"]):
+        faq_templates.extend([
+            {"question": "What does the standard warranty cover and for how long?", "answer": "[Pending fact validation — requires verified warranty terms and conditions]"},
+            {"question": "Is there an extended warranty option available?", "answer": "[Pending fact validation — requires verified extended warranty program details]"},
+        ])
+    else:
+        faq_templates.extend([
+            {"question": f"What are the key specifications relevant to {query.rstrip('?').strip()}?", "answer": "[Pending fact validation — requires verified product specifications from the brand]"},
+            {"question": "How does this compare to alternatives in the market?", "answer": "[Pending fact validation — requires verified comparative data]"},
+        ])
+    # Ensure minimum 3 FAQs
+    if len(faq_templates) < 3:
+        faq_templates.append({
+            "question": "Where can I find the most up-to-date official information?",
+            "answer": "[Pending fact validation — requires verified source page and documentation links]"
+        })
+    return faq_templates[:max(max_items, 3)]
 
 
 def _infer_intent_tags_for_query(query: str) -> list[str]:
@@ -1024,14 +1080,157 @@ def _infer_intent_tags_for_query(query: str) -> list[str]:
     return tags or ["general information"]
 
 
+def _generate_json_ld_tags_for_query(query: str, intent_tags: list[str], faq_items: list[dict]) -> list[str]:
+    """Generate JSON-LD schema field recommendations for the query.
+
+    Recommends valid schema.org fields: about, keywords, mentions, audience,
+    mainEntity, and FAQPage schema where applicable. Tags are generated from
+    the query portfolio and intent analysis, not hardcoded.
+    """
+    tags: list[str] = []
+    q_lower = query.lower()
+    # about: topic the page is about
+    tags.append(f'about: "{query.rstrip("?").strip()[:80]}"')
+    # keywords: from intent tags
+    if intent_tags:
+        kw_str = ", ".join(intent_tags[:5])
+        tags.append(f"keywords: [{kw_str}]")
+    # mainEntity: recommend WebPage or Product based on query type
+    if any(x in q_lower for x in ["buy", "price", "cost", "spec", "model", "vehicle", "car"]):
+        tags.append("mainEntity: Product")
+    elif any(x in q_lower for x in ["how", "what", "why", "guide", "tips"]):
+        tags.append("mainEntity: WebPage")
+    else:
+        tags.append("mainEntity: WebPage")
+    # audience: infer from query intent
+    if any(x in q_lower for x in ["family", "child", "parent"]):
+        tags.append('audience: "Family buyers"')
+    elif any(x in q_lower for x in ["business", "fleet", "commercial"]):
+        tags.append('audience: "Business/fleet buyers"')
+    elif any(x in q_lower for x in ["first", "beginner", "new"]):
+        tags.append('audience: "First-time buyers"')
+    else:
+        tags.append('audience: "Prospective buyers"')
+    # mentions: brand/product entities from query
+    mentions = [w for w in query.split() if w[0:1].isupper() and len(w) > 2]
+    if mentions:
+        tags.append(f"mentions: [{', '.join(mentions[:4])}]")
+    # FAQPage schema if FAQ items exist
+    if faq_items and len(faq_items) >= 2:
+        tags.append("FAQPage schema: recommended")
+    # additionalProperty for verified specs
+    tags.append("additionalProperty: [verified specs from owned page]")
+    return tags
+
+
+def _identify_missing_facts(query: str, mapped_page: dict) -> list[str]:
+    """Identify facts that are missing from the owned page for this query.
+
+    Returns clear missing-fact notes where evidence is unavailable.
+    """
+    missing: list[str] = []
+    q_lower = query.lower()
+    geo_dims = mapped_page.get("geo_dimensions") or {}
+    geo_score = mapped_page.get("current_geo_score_120", 0)
+    # Check what the query needs vs what the page has
+    if any(x in q_lower for x in ["cost", "price", "finance"]):
+        missing.append("Verified pricing data for the target model/product")
+        missing.append("Total cost of ownership breakdown")
+    if any(x in q_lower for x in ["range", "battery", "charging"]):
+        missing.append("Real-world range test data")
+        missing.append("Charging speed specifications by connector type")
+    if any(x in q_lower for x in ["safety", "crash", "rating"]):
+        missing.append("Official safety test results and ratings")
+    if any(x in q_lower for x in ["warranty", "guarantee"]):
+        missing.append("Warranty terms, coverage period and conditions")
+    if any(x in q_lower for x in ["family", "seat", "storage"]):
+        missing.append("Interior dimensions and cargo capacity measurements")
+    # GEO dimension gaps
+    if geo_dims.get("structured_data", 0) < 8:
+        missing.append("JSON-LD/schema markup needs to be added or enriched")
+    if geo_dims.get("faq_readiness", 0) < 8:
+        missing.append("FAQ content aligned to this query is missing")
+    if geo_dims.get("eeat_signals", 0) < 8:
+        missing.append("E-E-A-T signals (proof, authority, dates) need strengthening")
+    if not missing:
+        missing.append("Specific product data to create a direct, extractable answer")
+    return missing
+
+
+def _merge_cms_content_modules(page_cms: list[dict], content_modules: list[dict]) -> None:
+    """Merge Bodhi LLM cms_ready_content_modules into page_level_cms_recommendations.
+
+    Matches by target_owned_url, source_recommendation_id, or linked query IDs.
+    Populates frontend-facing fields: copyModules, directAnswer, faqItems,
+    factsUsed, factsMissing, jsonLdTags, intentTags.
+    """
+    # Build lookup indexes for matching
+    cms_by_url: dict[str, dict] = {}
+    cms_by_rec_id: dict[str, dict] = {}
+    for rec in page_cms:
+        url = (rec.get("target_url") or rec.get("url") or "").rstrip("/").lower()
+        if url:
+            cms_by_url[url] = rec
+        rec_id = rec.get("recommendation_id") or ""
+        if rec_id:
+            cms_by_rec_id[rec_id] = rec
+    for module in content_modules:
+        if not isinstance(module, dict):
+            continue
+        # Find matching CMS recommendation
+        target_url = (module.get("target_owned_url") or module.get("target_url") or "").rstrip("/").lower()
+        source_rec_id = module.get("source_recommendation_id") or module.get("recommendation_id") or ""
+        matched_rec = None
+        if target_url and target_url in cms_by_url:
+            matched_rec = cms_by_url[target_url]
+        elif source_rec_id and source_rec_id in cms_by_rec_id:
+            matched_rec = cms_by_rec_id[source_rec_id]
+        else:
+            # Try matching by linked query IDs
+            module_qids = set(str(q) for q in (module.get("linked_query_ids") or module.get("query_ids") or []))
+            if module_qids:
+                for rec in page_cms:
+                    rec_qids = set(str(q.get("query_id") if isinstance(q, dict) else q) for q in (rec.get("linked_queries") or rec.get("linked_query_ids") or []))
+                    if module_qids & rec_qids:
+                        matched_rec = rec
+                        break
+        if not matched_rec:
+            continue
+        # Merge enriched LLM fields into the canonical recommendation
+        if module.get("direct_answer") and not matched_rec.get("direct_answer"):
+            matched_rec["direct_answer"] = module["direct_answer"]
+        if module.get("faq_items") and (not matched_rec.get("faq_items") or all("[Pending" in str(f.get("answer", "")) for f in matched_rec.get("faq_items", []))):
+            matched_rec["faq_items"] = module["faq_items"]
+        if module.get("facts_used"):
+            matched_rec["facts_used"] = module["facts_used"]
+        if module.get("facts_missing"):
+            existing_missing = matched_rec.get("facts_missing") or []
+            new_missing = [f for f in module["facts_missing"] if f not in existing_missing]
+            matched_rec["facts_missing"] = existing_missing + new_missing
+        if module.get("json_ld_tags") and not matched_rec.get("json_ld_tags"):
+            matched_rec["json_ld_tags"] = module["json_ld_tags"]
+        if module.get("intent_tags") and not matched_rec.get("intent_tags"):
+            matched_rec["intent_tags"] = module["intent_tags"]
+        # Merge copy modules for frontend rendering
+        if module.get("copy_modules") or module.get("copyModules"):
+            matched_rec["copy_modules"] = module.get("copy_modules") or module.get("copyModules")
+        # Merge intro/body copy if richer than existing
+        for copy_field in ["intro_copy", "body_copy", "heading", "bullets"]:
+            if module.get(copy_field) and not matched_rec.get(copy_field):
+                matched_rec[copy_field] = module[copy_field]
+
+
 def cms_recs(query: str, qid: str, mapped: list[dict], patterns: list[dict], brand: str = "") -> list[dict]:
     recs=[]
     pat="; ".join(sorted({p["pattern_type"] for p in patterns})) or "answer-first extractable evidence"
     intent_tags = _infer_intent_tags_for_query(query)
     faq_items = _generate_faq_items_for_query(query, patterns, max_items=3)
+    json_ld_tags = _generate_json_ld_tags_for_query(query, intent_tags, faq_items)
     for m in mapped:
         fname=(m["url"].rstrip("/").split("/")[-1] or "owned page")
         direct_answer = _generate_direct_answer_for_query(query, brand, m)
+        # Determine facts_missing based on what the direct answer needs
+        facts_missing = _identify_missing_facts(query, m)
         recs.append({
             "recommendation_id": stable_id("cms", qid, m["url"]),
             "query_id": qid,
@@ -1041,8 +1240,8 @@ def cms_recs(query: str, qid: str, mapped: list[dict], patterns: list[dict], bra
             "direct_answer": direct_answer,
             "faq_items": faq_items,
             "facts_used": [],
-            "facts_missing": [],
-            "json_ld_tags": [],
+            "facts_missing": facts_missing,
+            "json_ld_tags": json_ld_tags,
             "intent_tags": intent_tags,
             "target_url": m["url"],
             "title": f"Add query-specific answer module to {fname}",
@@ -1431,6 +1630,8 @@ def build_brand_topic_scorecard(qwork: list[dict], run_history: list[dict] | Non
         "source_types": Counter(),
         "statuses": Counter(),
         "delta_values": [],
+        "sentiment_values": [],
+        "sentiment_scores": [],
     })
     for q in qwork or []:
         if not isinstance(q, dict):
@@ -1452,6 +1653,16 @@ def build_brand_topic_scorecard(qwork: list[dict], run_history: list[dict] | Non
             grp["owned_target_citations"] += 1
         if vis.get("owned_domain_cited"):
             grp["owned_domain_citations"] += 1
+        # Aggregate sentiment data per topic
+        brand_sentiment = vis.get("brand_sentiment") or ""
+        brand_sentiment_score = vis.get("brand_sentiment_score")
+        if brand_sentiment and brand_sentiment != "not_applicable":
+            grp["sentiment_values"].append(brand_sentiment)
+            if brand_sentiment_score is not None:
+                try:
+                    grp["sentiment_scores"].append(float(brand_sentiment_score))
+                except (ValueError, TypeError):
+                    pass
         score_value = vis.get("score")
         try:
             score_float = float(score_value)
@@ -1527,11 +1738,25 @@ def build_brand_topic_scorecard(qwork: list[dict], run_history: list[dict] | Non
             comment = "Present in AI evidence but not clearly owned; strengthen answer-first owned modules and proof points."
         else:
             comment = "Underrepresented in AI narratives; prioritise owned-page coverage and external authority signals."
+        # Compute avg brand sentiment for this topic
+        sentiment_vals = grp["sentiment_values"]
+        sentiment_scores = grp["sentiment_scores"]
+        if sentiment_scores:
+            avg_sentiment_score = round(sum(sentiment_scores) / len(sentiment_scores), 2)
+        else:
+            avg_sentiment_score = None
+        if sentiment_vals:
+            sentiment_counter = Counter(sentiment_vals)
+            avg_sentiment = sentiment_counter.most_common(1)[0][0]
+        else:
+            avg_sentiment = "not_applicable"
         row = {
             "topic": topic,
             "aiVisibilityScore": avg_score,
             "relativePosition": relative,
             "directionVsLastPeriod": direction,
+            "avgBrandSentiment": avg_sentiment,
+            "avgBrandSentimentScore": avg_sentiment_score,
             "comment": comment,
             "queryCount": query_count,
             "ownedUrlCount": len(grp["owned_urls"]),
@@ -2091,16 +2316,25 @@ def main():
     finalise_frontend_contract(bundle, *contract_sources)
     attach_ai_discoverability_hygiene(bundle, *hygiene_sources)
 
-    # --- Advanced GEO/AEO Recommendation Generator (Epic 3 & 4) ---
-    # Attach advanced_geo_asset to CMS recommendations and
-    # advanced_pr_asset_pack to PR opportunities using the two-pass
-    # fact-matrix architecture. These are optional contract extensions;
-    # existing reports without them continue to work.
+    # --- Merge cms_ready_content_modules into page_level_cms_recommendations ---
+    # The Bodhi CMS Copy Generator LLM node produces richer content modules
+    # stored as cms_ready_content_modules. These must be merged into the
+    # canonical page_level_cms_recommendations so the frontend renders
+    # the enriched LLM output instead of fallback/template logic.
+    cms_content_modules = bundle.get("cms_ready_content_modules")
+    if isinstance(cms_content_modules, list) and cms_content_modules:
+        page_cms = bundle.get("page_level_cms_recommendations") or bundle.get("cms_recommendations") or []
+        _merge_cms_content_modules(page_cms, cms_content_modules)
+        bundle["page_level_cms_recommendations"] = page_cms
+        bundle["cms_recommendations"] = page_cms
+        bundle.setdefault("parser_manifest", {})["cms_content_modules_merged"] = len(cms_content_modules)
+
+    # --- Advanced GEO/AEO Recommendation Generator (Epic 3) ---
+    # Attach advanced_geo_asset to CMS recommendations using the two-pass
+    # fact-matrix architecture. Separate try/except so CMS failures
+    # don't block PR generation.
     try:
         from advanced_cms_generator import attach_advanced_geo_assets_to_bundle
-        from advanced_pr_generator import attach_advanced_pr_asset_packs_to_bundle
-
-        # Collect owned page crawl data for fact matrix extraction.
         owned_page_sources = (
             records_list(load_json(root/'outputs/content_intelligence/owned_pages_full.json', {}), ["pages", "owned_pages", "items"])
             or records_list(load_json(Path(args.owned_pages), {}) if args.owned_pages else {}, ["pages", "owned_pages", "items"])
@@ -2112,10 +2346,17 @@ def main():
             brand=args.brand,
             language=getattr(args, 'output_language', 'English') or 'en',
         )
+    except Exception as cms_adv_err:
+        bundle.setdefault("validation", {})["advanced_cms_error"] = str(cms_adv_err)
+
+    # --- Advanced PR Asset Pack Generator (Epic 4) ---
+    # Attach advanced_pr_asset_pack to PR opportunities.
+    # Separate try/except so PR failures are visible and don't block CMS.
+    try:
+        from advanced_pr_generator import attach_advanced_pr_asset_packs_to_bundle
         attach_advanced_pr_asset_packs_to_bundle(bundle, brand=args.brand)
-    except Exception as adv_err:
-        # Advanced assets are optional; never block the canonical bundle.
-        bundle.setdefault("validation", {})["advanced_geo_aeo_error"] = str(adv_err)
+    except Exception as pr_adv_err:
+        bundle.setdefault("validation", {})["advanced_pr_error"] = str(pr_adv_err)
 
     write_json(root/'outputs/query_workbench/query_workbench.json', {"query_workbench": qwork})
     if query_portfolio_file: write_json(root/'outputs/query_portfolio/query_portfolio.normalised.json', query_portfolio_file)
