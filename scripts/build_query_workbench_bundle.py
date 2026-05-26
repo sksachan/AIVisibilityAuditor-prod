@@ -2439,6 +2439,24 @@ def main():
     except Exception as pr_adv_err:
         bundle.setdefault("validation", {})["advanced_pr_error"] = str(pr_adv_err)
 
+    # --- Non-Branded Competitor Visibility Matrix ---
+    # Deterministic derived analytics layer: no SerpAPI, crawl, or LLM calls.
+    try:
+        from build_competitor_visibility_matrix import (
+            build_competitor_visibility_matrix,
+            write_competitor_visibility_matrix,
+            print_summary as print_competitor_summary,
+        )
+        comp_matrix = build_competitor_visibility_matrix(
+            bundle, brand=args.brand, market=args.market
+        )
+        bundle["competitor_visibility_matrix"] = comp_matrix
+        write_competitor_visibility_matrix(comp_matrix, root / "outputs")
+        bundle.setdefault("parser_manifest", {})["competitor_visibility_matrix_competitors"] = len(comp_matrix.get("competitors") or [])
+        bundle.setdefault("parser_manifest", {})["competitor_visibility_matrix_non_branded_queries"] = comp_matrix.get("query_count_non_branded", 0)
+    except Exception as comp_err:
+        bundle.setdefault("validation", {})["competitor_visibility_error"] = str(comp_err)
+
     write_json(root/'outputs/query_workbench/query_workbench.json', {"query_workbench": qwork})
     if query_portfolio_file: write_json(root/'outputs/query_portfolio/query_portfolio.normalised.json', query_portfolio_file)
     if sitemap_inventory_file: write_json(root/'outputs/sitemap/sitemap_inventory.normalised.json', sitemap_inventory_file)
